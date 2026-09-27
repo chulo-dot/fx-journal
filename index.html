@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>FX Journal — Forex Trading Journal</title>
+<title>FX Journal â€” Forex Trading Journal</title>
 <meta name="description" content="A private, browser-only forex trading journal: log trades, track returns, drawdown and Sharpe ratio, and size positions by risk.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -347,7 +347,7 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
       <div class="note" id="gate-msg" hidden></div>
       <button class="btn btn-blue" type="submit" id="gate-submit" style="width:100%;justify-content:center;margin-top:4px">Sign in</button>
     </form>
-    <div class="gate-loading hidden" id="gate-loading">Loading…</div>
+    <div class="gate-loading hidden" id="gate-loading">Loadingâ€¦</div>
   </div>
 </div>
 <div class="app">
@@ -410,8 +410,8 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
     <div class="session" aria-label="Session summary">
       <div><span>Trades</span><span id="s-trades">0</span></div>
       <div><span>In view</span><span id="s-view">0</span></div>
-      <div><span>Balance</span><span id="s-bal">—</span></div>
-      <div><span>Last trade</span><span id="s-last">—</span></div>
+      <div><span>Balance</span><span id="s-bal">â€”</span></div>
+      <div><span>Last trade</span><span id="s-last">â€”</span></div>
       <div><span>Storage</span><span id="s-store">Browser</span></div>
     </div>
   </aside>
@@ -435,7 +435,7 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
       <section class="view fixed" id="v-trades" role="tabpanel" aria-labelledby="tab-trades" hidden>
         <div class="tr-tools">
           <label class="sr" for="t-q">Search trades</label>
-          <input class="inp search" type="search" id="t-q" placeholder="Search pair, strategy, notes…  ( / )" autocomplete="off">
+          <input class="inp search" type="search" id="t-q" placeholder="Search pair, strategy, notesâ€¦  ( / )" autocomplete="off">
           <label class="sr" for="t-asset">Filter by market</label>
           <select class="sel" id="t-asset">
             <option value="">Forex &amp; crypto</option><option value="forex">Forex</option><option value="crypto">Crypto</option>
@@ -578,7 +578,7 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
         </div>
         <div>
           <label class="lbl" for="f-tf">Time frame traded</label>
-          <input class="inp" id="f-tf" list="dl-tf" placeholder="15min, 45min, 1H…" autocomplete="off" maxlength="20">
+          <input class="inp" id="f-tf" list="dl-tf" placeholder="15min, 45min, 1Hâ€¦" autocomplete="off" maxlength="20">
         </div>
         <div class="full">
           <span class="lbl" id="f-side-lbl">Side</span>
@@ -631,7 +631,7 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
         </div>
         <div class="full">
           <label class="lbl" for="f-tag">Strategy</label>
-          <input class="inp" id="f-tag" list="dl-tags" placeholder="Breakout, pullback…" autocomplete="off" maxlength="40">
+          <input class="inp" id="f-tag" list="dl-tags" placeholder="Breakout, pullbackâ€¦" autocomplete="off" maxlength="40">
         </div>
         <div class="full">
           <label class="lbl" for="f-notes">Notes</label>
@@ -700,19 +700,19 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
     <p>Everything stays in this browser. Nothing is uploaded. Clearing site data removes the journal, so export a CSV now and then as a backup.</p>
     <h3>Keyboard</h3>
     <ul>
-      <li><kbd>N</kbd> add a trade &nbsp; <kbd>/</kbd> search trades &nbsp; <kbd>1</kbd>–<kbd>5</kbd> switch section</li>
+      <li><kbd>N</kbd> add a trade &nbsp; <kbd>/</kbd> search trades &nbsp; <kbd>1</kbd>â€“<kbd>5</kbd> switch section</li>
       <li><kbd>1</kbd> Dashboard &nbsp; <kbd>2</kbd> Trades &nbsp; <kbd>3</kbd> Calculator &nbsp; <kbd>4</kbd> Analytics &nbsp; <kbd>5</kbd> Summary</li>
       <li><kbd>Ctrl</kbd>/<kbd>?</kbd> + <kbd>Enter</kbd> saves the trade form</li>
     </ul>
     <h3>How numbers are worked out</h3>
     <ul>
-      <li><b>Return</b> = P&amp;L ÷ account size at entry. Every trade gets one.</li>
+      <li><b>Return</b> = P&amp;L Ã· account size at entry. Every trade gets one.</li>
       <li><b>Total return</b> adds trade returns. <b>Compounded</b> multiplies each day's return.</li>
-      <li><b>Win rate</b> = winning trades ÷ all trades. Break-even trades count as neither win nor loss.</li>
-      <li><b>Payoff ratio</b> = average winning return ÷ average losing return.</li>
-      <li><b>Profit factor</b> = gross profit ÷ gross loss. <b>Expectancy</b> = average P&amp;L per trade.</li>
+      <li><b>Win rate</b> = winning trades Ã· all trades. Break-even trades count as neither win nor loss.</li>
+      <li><b>Payoff ratio</b> = average winning return Ã· average losing return.</li>
+      <li><b>Profit factor</b> = gross profit Ã· gross loss. <b>Expectancy</b> = average P&amp;L per trade.</li>
       <li><b>Max drawdown</b> = biggest fall from a balance peak, using starting balance plus P&amp;L.</li>
-      <li><b>Sharpe</b> = average daily return ÷ its standard deviation × vperiods per year (change in Settings).</li>
+      <li><b>Sharpe</b> = average daily return Ã· its standard deviation Ã— vperiods per year (change in Settings).</li>
     </ul>
     <h3>Import format</h3>
     <p>CSV with a header row containing <code>Date</code>, <code>Side</code> (Long or Short) and <code>PnL</code>. Optional: <code>Account Size</code>, <code>Pair</code>, <code>Asset Type</code> (Forex or Crypto), <code>Time Frame</code>, <code>Lots</code>, <code>Entry</code>, <code>Exit</code>, <code>Stop</code>, <code>Risk</code>, <code>Screenshot Before</code>, <code>Screenshot After</code>, <code>Strategy</code>, <code>Notes</code>. Dates read as YYYY-MM-DD, M/D/YYYY or D.M.YYYY. Semicolon files with decimal commas work too.</p>
@@ -737,7 +737,7 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
 
 <script>
 /* ==========================================================================
-   ENGINE — pure functions, no DOM. Logic decoded from the MTG workbook spec
+   ENGINE â€” pure functions, no DOM. Logic decoded from the MTG workbook spec
    (return = PnL / account size, daily + cumulative series, win rate, payoff,
    Sharpe, risk-based position size) plus the recommended v2 fixes
    (every trade counted, real date spine, profit factor, expectancy,
@@ -990,7 +990,7 @@ function calcPosition(i) {
 
 /* ---------- crypto position sizing (v2) ----------
    Assumes the quote currency of the symbol (e.g. the USDT in BTCUSDT) is the
-   account currency, which covers the large majority of crypto trading — no
+   account currency, which covers the large majority of crypto trading â€” no
    pips, no fixed 100,000-unit contract, sized directly in coins/units. */
 function calcPositionCrypto(i) {
   const info = m => ({ ok: false, level: 'info', message: m });
@@ -1044,7 +1044,7 @@ function parseNumLoose(v, decComma) {
   if (!s) return null;
   let neg = false;
   if (/^\(.*\)$/.test(s)) { neg = true; s = s.slice(1, -1); }
-  s = s.replace(/[\u2212\u2013]/g, '-').replace(/[$€£¥%\s]/g, '');
+  s = s.replace(/[\u2212\u2013]/g, '-').replace(/[$â‚¬Â£Â¥%\s]/g, '');
   s = decComma ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
   if (!/^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i.test(s)) return null;
   const n = Number(s);
@@ -1185,7 +1185,7 @@ function heatSteps(values) {
   return [q(0.33), q(0.66)];
 }
 
-/* Account sizes are the workbook's own typed values (spec §8.1) so the demo reproduces the spec's numbers. */
+/* Account sizes are the workbook's own typed values (spec Â§8.1) so the demo reproduces the spec's numbers. */
 const SAMPLE_TRADES = [
   { accountSize: 2000, date: '2024-01-01', side: 'long',  pnl: 30,    pair: 'USDCAD', assetType: 'forex', timeframe: '15min', risk: 20, screenshotBefore: true, screenshotAfter: true, tag: 'Breakout', notes: 'Clean break of the Asian range; held to the first target.' },
   { accountSize: 2030, date: '2024-01-02', side: 'short', pnl: -20,   pair: 'EURUSD', assetType: 'forex', timeframe: '30min', risk: 20, screenshotBefore: true, screenshotAfter: false, tag: 'Pullback', notes: 'Entered early, stopped out before the retest.' },
@@ -1202,7 +1202,7 @@ const SAMPLE_TRADES = [
 
 
 /* ==========================================================================
-   APP — state, formatting, persistence, charts
+   APP â€” state, formatting, persistence, charts
    ========================================================================== */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -1229,7 +1229,7 @@ const D = {}; // derived data, rebuilt by recompute()
 /* ---------- formatting ---------- */
 const moneyFmts = {};
 function fmtMoney(v, signed) {
-  if (!isNum(v)) return '—';
+  if (!isNum(v)) return 'â€”';
   const cur = state.settings.currency;
   let s;
   try {
@@ -1242,16 +1242,16 @@ function fmtMoney(v, signed) {
   return s;
 }
 function fmtPct(v, d = 2, signed = false) {
-  if (!isNum(v)) return '—';
+  if (!isNum(v)) return 'â€”';
   const s = (Math.abs(v) * 100).toFixed(d);
   const zero = +s === 0;
   if (v < 0 && !zero) return MINUS + s + '%';
   if (signed && v > 0 && !zero) return '+' + s + '%';
   return s + '%';
 }
-function fmtNum(v, d = 2) { return isNum(v) ? (v < 0 ? MINUS : '') + Math.abs(v).toFixed(d) : '—'; }
-const fmtPx = v => (isNum(v) ? String(+v.toFixed(5)) : '—');
-const fmtLots = v => (isNum(v) ? String(+v.toFixed(3)) : '—');
+function fmtNum(v, d = 2) { return isNum(v) ? (v < 0 ? MINUS : '') + Math.abs(v).toFixed(d) : 'â€”'; }
+const fmtPx = v => (isNum(v) ? String(+v.toFixed(5)) : 'â€”');
+const fmtLots = v => (isNum(v) ? String(+v.toFixed(3)) : 'â€”');
 const sgnCls = v => (v > 0 ? 'pos' : v < 0 ? 'neg' : '');
 function dateLabel(iso, withYear) {
   const [y, m, d] = iso.split('-');
@@ -1317,7 +1317,7 @@ function save() {
 /* ---------- cloud sync (Supabase) ----------
    Fill in your own project's URL and anon key below to turn on multi-user
    login and cross-device sync. Leave them as-is to keep the original
-   single-browser, offline-only journal — everything above still works
+   single-browser, offline-only journal â€” everything above still works
    exactly the same either way.
 
    SETUP (free, no credit card):
@@ -1350,8 +1350,7 @@ function save() {
       off "Confirm email" in Authentication ? Settings for instant sign-up.
    5. Push this file to a GitHub repo and turn on GitHub Pages (Settings ? Pages)
       to get a free https://yourname.github.io/reponame address. */
-const SUPABASE_URL = '
-https://uixmayxboblugpldyzza.supabase.co/rest/v1/';
+const SUPABASE_URL = 'https://uixmayxboblugpldyzza.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_vD7lRUsmakl8w1wxS8sw7A_6zsptCUl';
 const CLOUD_ENABLED = /^https:\/\/.+\.supabase\.co\/?$/.test(SUPABASE_URL) && SUPABASE_ANON_KEY.length > 20;
 const sb = CLOUD_ENABLED && window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
@@ -1379,10 +1378,10 @@ function rowToTrade(r) {
 function setCloudStatus(status, extra) {
   if (!CLOUD_ENABLED) return;
   const dot = $('#pingSave'), txt = $('#pingSaveTxt');
-  if (status === 'loading') { dot.className = 'dot'; txt.textContent = 'Loading your trades…'; }
-  else if (status === 'saving') { dot.className = 'dot'; txt.textContent = 'Saving to cloud…'; }
-  else if (status === 'saved') { dot.className = 'dot ok'; txt.textContent = cloudUser ? `Synced · ${cloudUser.email}` : 'Synced'; }
-  else if (status === 'error') { dot.className = 'dot'; txt.textContent = extra || 'Cloud sync failed — will retry'; }
+  if (status === 'loading') { dot.className = 'dot'; txt.textContent = 'Loading your tradesâ€¦'; }
+  else if (status === 'saving') { dot.className = 'dot'; txt.textContent = 'Saving to cloudâ€¦'; }
+  else if (status === 'saved') { dot.className = 'dot ok'; txt.textContent = cloudUser ? `Synced Â· ${cloudUser.email}` : 'Synced'; }
+  else if (status === 'error') { dot.className = 'dot'; txt.textContent = extra || 'Cloud sync failed â€” will retry'; }
   else if (status === 'signedout') { dot.className = 'dot'; txt.textContent = 'Signed out'; }
 }
 function scheduleCloudSync() {
@@ -1442,7 +1441,7 @@ function hideGate() { $('#gate').classList.add('hidden'); }
 function setGateTab(tab) {
   $$('[data-gate-tab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.gateTab === tab)));
   $('#gate-submit').textContent = tab === 'signup' ? 'Create account' : 'Sign in';
-  $('#gate-sub').textContent = tab === 'signup' ? 'Create a password-protected account — your trades stay private to you.' : 'Sign in to sync your trades to the cloud.';
+  $('#gate-sub').textContent = tab === 'signup' ? 'Create a password-protected account â€” your trades stay private to you.' : 'Sign in to sync your trades to the cloud.';
   $('#f-gate').dataset.mode = tab;
   $('#gate-err').hidden = true; $('#gate-msg').hidden = true;
 }
@@ -1520,7 +1519,7 @@ function toast(msg) {
 }
 
 /* ==========================================================================
-   CHARTS — hand-built SVG, no libraries
+   CHARTS â€” hand-built SVG, no libraries
    ========================================================================== */
 function niceTicks(lo, hi, n = 5) {
   if (!(hi > lo)) { const d = Math.abs(hi) || 1; lo -= d * 0.1; hi += d * 0.1; }
@@ -1708,13 +1707,13 @@ function renderDash() {
     const sh = sharpeFor(D.ds.map(r => r[shKey]));
     const cards = [
       kpi('Total P&L', fmtMoney(S.totalPnl, true), `${S.n} trade${S.n === 1 ? '' : 's'}`, 'accent', sgnCls(S.totalPnl)),
-      kpi('Total return', fmtPct(S.totalReturn, 2, true), `Compounded ${fmtPct(S.compounded, 2, true)}`, 'green', sgnCls(S.totalReturn), 'Sum of each trade’s P&L ÷ account size'),
-      kpi('Win rate', fmtPct(S.winRate, 1), `${S.wins}W · ${S.losses}L · ${S.be}BE`, 'amber', '', 'Winning trades ÷ all trades'),
-      kpi('Payoff ratio', fmtNum(S.payoff), S.payoff === null ? 'Needs a win and a loss' : `Avg win ${fmtPct(S.avgWin)} / loss ${fmtPct(Math.abs(S.avgLoss))}`, 'purple', '', 'Average winning return ÷ average losing return'),
-      kpi('Profit factor', fmtNum(S.profitFactor), S.profitFactor === null ? 'No losing trades yet' : `${fmtMoney(S.grossProfit)} won / ${fmtMoney(S.grossLoss)} lost`, 'cyan', '', 'Gross profit ÷ gross loss'),
+      kpi('Total return', fmtPct(S.totalReturn, 2, true), `Compounded ${fmtPct(S.compounded, 2, true)}`, 'green', sgnCls(S.totalReturn), 'Sum of each tradeâ€™s P&L Ã· account size'),
+      kpi('Win rate', fmtPct(S.winRate, 1), `${S.wins}W Â· ${S.losses}L Â· ${S.be}BE`, 'amber', '', 'Winning trades Ã· all trades'),
+      kpi('Payoff ratio', fmtNum(S.payoff), S.payoff === null ? 'Needs a win and a loss' : `Avg win ${fmtPct(S.avgWin)} / loss ${fmtPct(Math.abs(S.avgLoss))}`, 'purple', '', 'Average winning return Ã· average losing return'),
+      kpi('Profit factor', fmtNum(S.profitFactor), S.profitFactor === null ? 'No losing trades yet' : `${fmtMoney(S.grossProfit)} won / ${fmtMoney(S.grossLoss)} lost`, 'cyan', '', 'Gross profit Ã· gross loss'),
       kpi('Expectancy', fmtMoney(S.expectancy, true), 'average per trade', 'amber', sgnCls(S.expectancy)),
       kpi('Max drawdown', dd.maxDd < 0 ? fmtPct(dd.maxDd) : '0.00%', dd.maxDd < 0 ? `${fmtMoney(dd.peak)} ? ${fmtMoney(dd.trough)}` : 'No drawdown', 'red', dd.maxDd < 0 ? 'neg' : '', 'Biggest fall from a balance peak'),
-      kpi('Sharpe ratio', fmtNum(sh.sharpe), `${st.periods}/yr · ${st.sharpeMode === 'active' ? 'active days' : 'all days'}`, 'accent', '', sh.sharpe === null ? 'Needs at least 2 days with varying returns' : 'Average daily return ÷ standard deviation, annualised'),
+      kpi('Sharpe ratio', fmtNum(sh.sharpe), `${st.periods}/yr Â· ${st.sharpeMode === 'active' ? 'active days' : 'all days'}`, 'accent', '', sh.sharpe === null ? 'Needs at least 2 days with varying returns' : 'Average daily return Ã· standard deviation, annualised'),
     ];
     const curve = state.ui.curve;
     const latest = D.view.slice().reverse().slice(0, 6);
@@ -1750,7 +1749,7 @@ function renderDash() {
         <div style="overflow-x:auto"><table class="tbl compact"><thead><tr>
           <th><span class="th">Date</span></th><th><span class="th">Pair</span></th><th><span class="th">Side</span></th>
           <th class="r"><span class="th">P&amp;L</span></th><th class="r"><span class="th">Return</span></th></tr></thead><tbody>
-          ${latest.map(t => `<tr><td>${t.date}</td><td class="pair">${esc(t.pair) || '<span class="faint">—</span>'}</td>
+          ${latest.map(t => `<tr><td>${t.date}</td><td class="pair">${esc(t.pair) || '<span class="faint">â€”</span>'}</td>
             <td><span class="badge ${t.side === 'long' ? 'b-long' : 'b-short'}">${t.side === 'long' ? 'LONG' : 'SHORT'}</span></td>
             <td class="r ${sgnCls(t.pnl)}"><b>${fmtMoney(t.pnl, true)}</b></td><td class="r ${sgnCls(t.ret)}">${fmtPct(t.ret, 2, true)}</td></tr>`).join('')}
         </tbody></table></div>
@@ -1793,7 +1792,7 @@ function drawHeat() {
     else { const a = Math.abs(o.pnl); cls += (o.pnl > 0 ? ' p' : ' l') + (a <= steps[0] ? 1 : a <= steps[1] ? 2 : 3); }
     const rounded = Math.round(o.pnl);
     const label = rounded === 0 ? '0' : (rounded > 0 ? '+' : MINUS) + Math.abs(rounded);
-    const tip = `${d}\n${o.n} trade${o.n > 1 ? 's' : ''} · ${fmtMoney(o.pnl, true)} (${fmtPct(o.ret, 2, true)})`;
+    const tip = `${d}\n${o.n} trade${o.n > 1 ? 's' : ''} Â· ${fmtMoney(o.pnl, true)} (${fmtPct(o.ret, 2, true)})`;
     cells += `<button class="${cls}" data-action="day" data-date="${d}" data-tip="${esc(tip)}" aria-label="${esc(tip.replace('\n', ': '))}">${esc(label)}</button>`;
   }
   let months = '', lastCol = -9;
@@ -1899,10 +1898,10 @@ function renderSummary() {
       kpi('Total wins', String(s.wins), 'winning trades', 'green', 'pos'),
       kpi('Total losses', String(s.losses), 'losing trades', 'red', s.losses ? 'neg' : ''),
       kpi('Break-even', String(s.be), 'net to zero', 'amber'),
-      kpi('Win rate', fmtPct(s.winRate, 1), `${s.wins}W · ${s.losses}L · ${s.be}BE`, 'purple'),
-      kpi('Total R', s.rCount ? fmtNum(s.totalR) + 'R' : '—', rNote, 'cyan', sgnCls(s.totalR)),
-      kpi('Best trade R', isNum(s.bestR) ? fmtNum(s.bestR) + 'R' : '—', 'largest R multiple', 'green', s.bestR > 0 ? 'pos' : ''),
-      kpi('Worst trade R', isNum(s.worstR) ? fmtNum(s.worstR) + 'R' : '—', 'smallest R multiple', 'red', s.worstR < 0 ? 'neg' : ''),
+      kpi('Win rate', fmtPct(s.winRate, 1), `${s.wins}W Â· ${s.losses}L Â· ${s.be}BE`, 'purple'),
+      kpi('Total R', s.rCount ? fmtNum(s.totalR) + 'R' : 'â€”', rNote, 'cyan', sgnCls(s.totalR)),
+      kpi('Best trade R', isNum(s.bestR) ? fmtNum(s.bestR) + 'R' : 'â€”', 'largest R multiple', 'green', s.bestR > 0 ? 'pos' : ''),
+      kpi('Worst trade R', isNum(s.worstR) ? fmtNum(s.worstR) + 'R' : 'â€”', 'smallest R multiple', 'red', s.worstR < 0 ? 'neg' : ''),
     ];
     el.innerHTML = `<div class="grid kpis">${cards.join('')}</div>`;
   });
@@ -1926,7 +1925,7 @@ function weekdayRows() {
   const max = Math.max(1e-9, ...g.map(o => Math.abs(o.pnl)));
   return order.map(d => {
     const o = by.get(d);
-    if (!o) return `<div class="div-row"><span>${DAYS[d]}</span><div class="div-track"></div><span class="div-val faint">—</span></div>`;
+    if (!o) return `<div class="div-row"><span>${DAYS[d]}</span><div class="div-track"></div><span class="div-val faint">â€”</span></div>`;
     const w = (Math.abs(o.pnl) / max * 50).toFixed(1);
     return `<div class="div-row"><span>${DAYS[d]} <span class="faint">${o.n}</span></span><div class="div-track"><i class="${o.pnl >= 0 ? 'p' : 'n'}" style="width:${w}%"></i></div>
       <span class="div-val ${sgnCls(o.pnl)}">${fmtMoney(o.pnl, true)}</span></div>`;
@@ -1946,7 +1945,7 @@ function drawPairs() {
     const name = o.key || 'No pair';
     return `<button class="rank-row" data-action="drill-pair" data-pair="${esc(o.key || '__none__')}" aria-label="Show trades for ${esc(name)}">
       <span class="rk ${i < 3 ? 'r' + (i + 1) : ''}">${i + 1}</span>
-      <span><span class="rank-name">${esc(name)}<span>${o.n} trade${o.n > 1 ? 's' : ''} · ${fmtPct(o.winRate, 0)} won</span></span><span class="bar"><i class="${cls}" style="width:${w.toFixed(1)}%"></i></span></span>
+      <span><span class="rank-name">${esc(name)}<span>${o.n} trade${o.n > 1 ? 's' : ''} Â· ${fmtPct(o.winRate, 0)} won</span></span><span class="bar"><i class="${cls}" style="width:${w.toFixed(1)}%"></i></span></span>
       <span class="rank-val ${m === 'pnl' || m === 'ret' ? sgnCls(v) : ''}">${fmt(o)}</span></button>`;
   }).join('');
 }
@@ -1998,16 +1997,16 @@ function tradeRow(t) {
   const ssBadge = v => `<span class="badge ${v ? 'b-yes' : 'b-no'}">${v ? 'YES' : 'NO'}</span>`;
   return `<tr><td class="r dim">${t.tradeNo}</td><td>${t.date}</td>
     <td><span class="badge ${t.assetType === 'crypto' ? 'b-crypto' : 'b-forex'}">${t.assetType === 'crypto' ? 'CRYPTO' : 'FOREX'}</span></td>
-    <td class="pair">${esc(t.pair) || '<span class="faint">—</span>'}</td>
+    <td class="pair">${esc(t.pair) || '<span class="faint">â€”</span>'}</td>
     <td><span class="badge ${t.side === 'long' ? 'b-long' : 'b-short'}">${t.side === 'long' ? 'LONG' : 'SHORT'}</span></td>
-    <td>${esc(t.timeframe) || '<span class="faint">—</span>'}</td>
+    <td>${esc(t.timeframe) || '<span class="faint">â€”</span>'}</td>
     <td class="r">${fmtLots(t.lots)}</td><td class="r">${fmtPx(t.entry)}</td><td class="r">${fmtPx(t.exit)}</td>
     <td class="r ${sgnCls(t.pnl)}"><b>${fmtMoney(t.pnl, true)}</b></td>
     <td class="r">${fmtMoney(t.equity)}${t.equityAuto ? '' : '<span class="manual" title="Account size entered manually">M</span>'}</td>
     <td class="r ${sgnCls(t.ret)}">${fmtPct(t.ret, 2, true)}</td>
-    <td class="r ${sgnCls(t.rMult)}">${isNum(t.rMult) ? fmtNum(t.rMult) + 'R' : '—'}</td>
+    <td class="r ${sgnCls(t.rMult)}">${isNum(t.rMult) ? fmtNum(t.rMult) + 'R' : 'â€”'}</td>
     <td>${ssBadge(t.screenshotBefore)}</td><td>${ssBadge(t.screenshotAfter)}</td>
-    <td>${esc(t.tag) || '<span class="faint">—</span>'}</td><td class="ellip" title="${esc(t.notes)}">${esc(t.notes)}</td>
+    <td>${esc(t.tag) || '<span class="faint">â€”</span>'}</td><td class="ellip" title="${esc(t.notes)}">${esc(t.notes)}</td>
     <td class="act"><button data-action="edit" data-id="${t.id}" aria-label="Edit trade on ${t.date}">Edit</button><button class="del" data-action="del" data-id="${t.id}" aria-label="Delete trade on ${t.date}">Delete</button></td></tr>`;
 }
 function renderTrades() {
@@ -2168,16 +2167,16 @@ function syncChrome() {
   $('#s-trades').textContent = D.all.length;
   $('#s-view').textContent = D.view.length;
   $('#s-bal').textContent = fmtMoney(D.balance);
-  $('#s-last').textContent = D.all.length ? D.anchor : '—';
-  $('#s-store').textContent = CLOUD_ENABLED ? (cloudUser ? `Cloud · ${cloudUser.email}` : 'Cloud (signed out)') : (storageOk ? 'This browser' : 'Off');
+  $('#s-last').textContent = D.all.length ? D.anchor : 'â€”';
+  $('#s-store').textContent = CLOUD_ENABLED ? (cloudUser ? `Cloud Â· ${cloudUser.email}` : 'Cloud (signed out)') : (storageOk ? 'This browser' : 'Off');
   $('#pingData').className = 'dot' + (D.all.length ? ' ok' : ' warn');
   $('#pingDataTxt').textContent = D.all.length ? `${D.all.length} trades` : 'No trades';
   if (!CLOUD_ENABLED) {
     $('#pingSave').className = 'dot' + (storageOk ? ' ok' : '');
     $('#pingSaveTxt').textContent = storageOk ? 'Saved in this browser' : 'Not saved: export a CSV';
   }
-  const from = u.from || (D.all[0] ? D.all[0].date : '—'), to = u.to || 'latest';
-  $('#scopeNote').textContent = D.all.length ? `${u.scope === 'all' ? 'All sides' : u.scope === 'long' ? 'Long only' : 'Short only'} · ${from} to ${to} · ${D.view.length} trades` : '';
+  const from = u.from || (D.all[0] ? D.all[0].date : 'â€”'), to = u.to || 'latest';
+  $('#scopeNote').textContent = D.all.length ? `${u.scope === 'all' ? 'All sides' : u.scope === 'long' ? 'Long only' : 'Short only'} Â· ${from} to ${to} Â· ${D.view.length} trades` : '';
   $('#dl-pairs').innerHTML = [...new Set(D.all.map(t => t.pair).filter(Boolean))].map(p => `<option value="${esc(p)}">`).join('');
   $('#dl-tags').innerHTML = [...new Set(D.all.map(t => t.tag).filter(Boolean))].map(p => `<option value="${esc(p)}">`).join('');
 }
@@ -2281,7 +2280,7 @@ function saveTrade() {
 async function deleteTrade(id) {
   const t = state.trades.find(x => x.id === id);
   if (!t) return;
-  if (!await ask('Delete trade', `Delete the ${esc(t.side)} trade${t.pair ? ' on ' + esc(t.pair) : ''} from ${esc(t.date)}? This can’t be undone.`, 'Delete', true)) return;
+  if (!await ask('Delete trade', `Delete the ${esc(t.side)} trade${t.pair ? ' on ' + esc(t.pair) : ''} from ${esc(t.date)}? This canâ€™t be undone.`, 'Delete', true)) return;
   state.trades = state.trades.filter(x => x.id !== id);
   save(); renderAll(); toast('Trade deleted');
 }
@@ -2327,7 +2326,7 @@ async function importFile(file) {
   if (file.size > 5e6) { await ask('Import CSV', 'This file is larger than 5 MB. Split it into smaller files and try again.', 'OK', false, true); return; }
   const { rows, delim } = parseCSV(await file.text());
   const res = importRows(rows, delim);
-  const list = res.errors.slice(0, 8).map(e => `<li>Row ${e.row}: ${esc(e.msg)}</li>`).join('') + (res.errors.length > 8 ? `<li>…and ${res.errors.length - 8} more.</li>` : '');
+  const list = res.errors.slice(0, 8).map(e => `<li>Row ${e.row}: ${esc(e.msg)}</li>`).join('') + (res.errors.length > 8 ? `<li>â€¦and ${res.errors.length - 8} more.</li>` : '');
   if (!res.trades.length) {
     await ask('Nothing imported', `<p>No valid trades were found in ${esc(file.name)}.</p>${list ? `<ul>${list}</ul>` : ''}<p style="margin-top:8px">Needs a header row with Date, Side (Long or Short) and PnL.</p>`, 'OK', false, true);
     return;
@@ -2347,7 +2346,7 @@ async function loadSample() {
 }
 async function clearAll() {
   if (!state.trades.length) { toast('The journal is already empty'); return; }
-  if (!await ask('Clear journal', `Delete all ${state.trades.length} trades? This can’t be undone. Export a CSV first if you want a backup.`, 'Delete all', true)) return;
+  if (!await ask('Clear journal', `Delete all ${state.trades.length} trades? This canâ€™t be undone. Export a CSV first if you want a backup.`, 'Delete all', true)) return;
   state.trades = []; state.seq = 0;
   save(); renderAll(); toast('Journal cleared');
 }
@@ -2428,7 +2427,7 @@ document.addEventListener('click', e => {
       const sign = sideEl.value === 'long' ? 1 : -1;
       const pnl = crypto ? (exit - entry) * lots * sign : (exit - entry) * lots * 100000 * sign;
       $('#f-pnl').value = +pnl.toFixed(2);
-      toast('P&L calculated — adjust it by hand if you need to');
+      toast('P&L calculated â€” adjust it by hand if you need to');
       break;
     }
     case 'signout': if (sb) sb.auth.signOut(); break;
@@ -2483,7 +2482,7 @@ $('#f-gate').addEventListener('submit', async e => {
   const err = $('#gate-err'), msg = $('#gate-msg'), btn = $('#gate-submit');
   err.hidden = true; msg.hidden = true;
   if (!email || pass.length < 6) { err.textContent = 'Enter an email and a password of at least 6 characters.'; err.hidden = false; return; }
-  btn.disabled = true; btn.textContent = 'Please wait…';
+  btn.disabled = true; btn.textContent = 'Please waitâ€¦';
   try {
     if (mode === 'signup') {
       const { data, error } = await sb.auth.signUp({ email, password: pass });
