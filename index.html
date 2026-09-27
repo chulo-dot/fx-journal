@@ -1,0 +1,2509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FX Journal — Forex Trading Journal</title>
+<meta name="description" content="A private, browser-only forex trading journal: log trades, track returns, drawdown and Sharpe ratio, and size positions by risk.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Cloud sync + multi-user login (Supabase). Safe to remove this line and the config
+     block near the top of the script below if you only want the local, offline version. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#0d0d0f; --surface:#13131a; --surface2:#1a1a24; --surface3:#21212e;
+  --border:#2a2a3a; --border2:#353548;
+  --text:#f2f2ff; --text-dim:#b0b0cc; --text-faint:#7a7ab8;
+  --accent:#4f8ef7; --accent-dim:#1a2e5a;
+  --green:#34d399; --green-dim:#0d3326;
+  --amber:#fbbf24; --amber-dim:#3d2c00;
+  --red:#f87171; --red-dim:#3d1010;
+  --cyan:#22d3ee; --purple:#a78bfa;
+  --pos:var(--green); --neg:var(--red);
+  --c-long:#34d399; --c-short:#a5a5b8; --c-total:#fbbf24;
+  --hp1:#12513b; --hp2:#1c8f65; --hp3:#34d399;
+  --hl1:#57211f; --hl2:#b04444; --hl3:#f87171;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  color-scheme:dark;
+}
+body.light{
+  --bg:#f0f0f5; --surface:#fff; --surface2:#f5f5fa; --surface3:#ebebf5;
+  --border:#d8d8e8; --border2:#c0c0d8;
+  --text:#0d0d20; --text-dim:#4a4a6a; --text-faint:#6a6a8c;
+  --accent:#2f6fe0; --accent-dim:#dce8ff;
+  --green-dim:#d0f5e8; --amber-dim:#fff3cc; --red-dim:#ffe0e0;
+  --pos:#0c8a5f; --neg:#d03c3c;
+  --c-long:#12a373; --c-short:#8a8a9c; --c-total:#e08a00;
+  --hp1:#c9f2e2; --hp2:#7fd9b7; --hp3:#1fa877;
+  --hl1:#fbd5d5; --hl2:#f09a9a; --hl3:#dc4c4c;
+  color-scheme:light;
+}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font:400 13px/1.45 var(--sans);-webkit-font-smoothing:antialiased;height:100vh;height:100dvh;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.mono{font-family:var(--mono)}
+.pos{color:var(--pos)} .neg{color:var(--neg)} .dim{color:var(--text-dim)} .faint{color:var(--text-faint)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.grow{flex:1}
+
+/* ---------- shell ---------- */
+.app{display:grid;grid-template-columns:290px minmax(0,1fr);grid-template-rows:48px minmax(0,1fr);height:100%}
+.hdr{grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:0 14px;background:var(--surface);border-bottom:1px solid var(--border);min-width:0}
+.brand{font:700 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.tag{font:700 9.5px var(--mono);letter-spacing:.08em;color:var(--accent);background:var(--accent-dim);padding:2px 6px;border-radius:3px;margin-left:6px}
+.vsep{width:1px;height:20px;background:var(--border2);flex:none}
+.pings{display:flex;gap:14px}
+.ping{display:flex;align-items:center;gap:6px;font:700 9.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--red);flex:none}
+.dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dot.warn{background:var(--amber)}
+.hdr-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
+.menu-btn{display:none}
+
+.side{background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:14px 14px 18px;display:flex;flex-direction:column;gap:18px;min-height:0}
+.section-title{font:700 10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--text-faint);border-left:2px solid var(--border2);padding-left:8px;margin-bottom:9px}
+.side-group{display:flex;flex-direction:column}
+.upload-box{display:flex;align-items:center;gap:10px;width:100%;padding:9px 11px;background:var(--surface2);border:1px dashed var(--border2);border-radius:5px;cursor:pointer;text-align:left;color:var(--text-dim);font:600 11.5px var(--sans);transition:border-color .12s,background .12s}
+.upload-box:hover{border-color:var(--accent);background:var(--surface3);color:var(--text)}
+.upload-box .g{font:700 14px var(--mono);color:var(--accent)}
+.upload-box small{display:block;font:400 10.5px var(--mono);color:var(--text-faint)}
+.stack{display:flex;flex-direction:column;gap:6px}
+.row{display:flex;gap:6px;align-items:center}
+.presets{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.session{margin-top:auto;font:500 10.5px var(--mono);display:flex;flex-direction:column;gap:5px}
+.session div{display:flex;justify-content:space-between;gap:8px}
+.session span:first-child{color:var(--text-faint);letter-spacing:.1em;text-transform:uppercase;font-size:10px}
+.session span:last-child{color:var(--text);text-align:right}
+
+.main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.toolbar{display:flex;align-items:center;gap:10px;padding:9px 20px;background:var(--bg);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.nav-tabs{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:3px;gap:2px}
+.nav-tabs button{background:none;border:0;color:var(--text-dim);font:600 11.5px var(--sans);padding:5px 14px;border-radius:5px;cursor:pointer;transition:background .1s,color .1s}
+.nav-tabs button:hover{color:var(--text);background:var(--surface2)}
+.nav-tabs button[aria-selected=true]{background:var(--accent);color:#fff;font-weight:700}
+.scope-note{font:500 10.5px var(--mono);color:var(--text-dim)}
+.views{flex:1;min-height:0;position:relative}
+.view{position:absolute;inset:0;overflow-y:auto;padding:16px 20px 28px}
+.view.fixed{display:flex;flex-direction:column;overflow:hidden}
+
+/* ---------- controls ---------- */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;color:var(--text-dim);font:600 11.5px var(--sans);cursor:pointer;white-space:nowrap;transition:background .1s,color .1s,border-color .1s}
+.btn:hover{background:var(--surface3);color:var(--text)}
+.btn:disabled{opacity:.28;cursor:not-allowed}
+.btn-blue{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-blue:hover{background:var(--accent);color:#fff;filter:brightness(1.12)}
+.btn-sm{padding:3px 8px;font-size:10.5px}
+.btn.t-green{color:var(--pos)} .btn.t-cyan{color:var(--cyan)} .btn.t-amber{color:var(--amber)} .btn.t-red{color:var(--neg)}
+body.light .btn.t-cyan{color:#0a89a5} body.light .btn.t-amber{color:#a86e00}
+.inp,.sel,.txt{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:6px 8px;font:500 11.5px var(--mono);color:var(--text);transition:border-color .1s}
+.txt{font-family:var(--sans);font-size:12.5px;resize:vertical;min-height:64px}
+.inp:focus,.sel:focus,.txt:focus{outline:none;border-color:var(--accent)}
+.inp::placeholder,.txt::placeholder{color:var(--text-faint)}
+.inp.invalid,.sel.invalid,.txt.invalid{border-color:var(--red)}
+.sel{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%237a7ab8' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+.search{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' fill='none' stroke='%237a7ab8' stroke-width='1.6'%3E%3Ccircle cx='5.5' cy='5.5' r='4'/%3E%3Cpath d='M9 9l3.5 3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:8px center;padding-left:28px}
+.lbl{display:block;font:700 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px}
+.hint{font:400 11px var(--sans);color:var(--text-faint);margin-top:4px}
+.err{font:500 11px var(--sans);color:var(--neg);margin-top:4px}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:3px;gap:2px;width:100%}
+.seg.inline{width:auto}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label,.seg button{flex:1;text-align:center;padding:5px 12px;border-radius:5px;font:600 11.5px var(--sans);color:var(--text-dim);cursor:pointer;border:0;background:none;white-space:nowrap}
+.seg label:hover,.seg button:hover{color:var(--text);background:var(--surface2)}
+.seg input:checked+label,.seg button[aria-pressed=true]{background:var(--accent);color:#fff}
+.seg input:focus-visible+label{outline:2px solid var(--accent);outline-offset:2px}
+.seg.long input:checked+label{background:var(--green-dim);color:var(--pos);box-shadow:inset 0 0 0 1px var(--green)}
+.seg.short input:checked+label{background:var(--surface3);color:var(--text);box-shadow:inset 0 0 0 1px var(--c-short)}
+.chip{font:600 10px var(--mono);letter-spacing:.06em;padding:3px 9px;border-radius:99px;background:var(--surface2);border:1px solid var(--border2);color:var(--text-dim);cursor:pointer}
+.chip:hover,.chip[aria-pressed=true]{background:var(--accent-dim);color:var(--accent);border-color:var(--accent)}
+.fchip{display:inline-flex;align-items:center;gap:6px;font:600 10px var(--mono);padding:2px 4px 2px 9px;border-radius:99px;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent)}
+.fchip button{background:none;border:0;color:inherit;cursor:pointer;padding:0 5px;font-size:11px}
+
+/* ---------- cards ---------- */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:14px 16px;min-width:0}
+.card-title{display:flex;align-items:center;justify-content:space-between;gap:10px;font:700 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);border-left:2px solid var(--accent);padding-left:8px;margin-bottom:12px;min-height:16px}
+.card-title .ctl{display:flex;gap:6px;align-items:center;letter-spacing:0;text-transform:none}
+.card-sub{font:400 11.5px var(--sans);color:var(--text-faint);margin:-6px 0 10px 10px}
+.grid{display:grid;gap:10px;margin-bottom:10px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g21{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:14px 16px 12px;position:relative;overflow:hidden;min-width:0}
+.stat-card::after{content:'';position:absolute;inset:0 0 auto 0;height:2px;background:var(--strip,var(--accent))}
+.stat-label{font:700 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px}
+.stat-val{font:700 1.6rem/1 var(--mono);margin-bottom:6px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat-sub{font:500 10.5px var(--mono);color:var(--text-faint)}
+.badge{display:inline-block;font:700 10.5px var(--mono);padding:2px 7px;border-radius:3px;letter-spacing:.04em}
+.b-long{background:var(--green-dim);color:var(--pos)}
+.b-short{background:var(--surface3);color:var(--text-dim)}
+.b-crypto{background:var(--amber-dim);color:var(--amber)}
+.b-forex{background:var(--accent-dim);color:var(--accent)}
+.b-yes{background:var(--green-dim);color:var(--pos)}
+.b-no{background:var(--surface3);color:var(--text-faint)}
+.b-warn{background:var(--amber-dim);color:var(--amber)}
+body.light .b-warn{color:#8a5a00}
+.empty{padding:38px 20px;text-align:center;color:var(--text-dim)}
+.empty h2{font:600 15px var(--sans);color:var(--text);margin-bottom:6px}
+.empty p{max-width:52ch;margin:0 auto 14px;color:var(--text-faint);font-size:12.5px}
+.empty .row{justify-content:center}
+.note{font:400 12px/1.5 var(--sans);color:var(--text-dim);padding:9px 12px;border-radius:5px;background:var(--surface2);border:1px solid var(--border)}
+.note.error{background:var(--red-dim);border-color:var(--red);color:var(--text)}
+.note.warn{background:var(--amber-dim);border-color:var(--amber);color:var(--text)}
+.note+.note{margin-top:6px}
+#gate{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+.hidden{display:none !important}
+.gate-card{width:min(380px,100%);background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:24px 22px}
+.gate-brand{font:700 15px var(--mono);letter-spacing:.04em;margin-bottom:2px}
+.gate-sub{font:400 12px var(--sans);color:var(--text-dim);margin-bottom:18px}
+.gate-tabs{display:flex;gap:4px;background:var(--surface2);border-radius:6px;padding:3px;margin-bottom:16px}
+.gate-tabs button{flex:1;padding:7px 0;border:0;border-radius:4px;background:transparent;color:var(--text-dim);font:600 12px var(--sans);cursor:pointer}
+.gate-tabs button[aria-selected=true]{background:var(--surface3);color:var(--text)}
+.gate-field{margin-bottom:12px}
+.gate-loading{display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font:400 13px var(--sans)}
+
+/* ---------- charts ---------- */
+.chart{position:relative;width:100%;min-height:120px}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.gl{stroke:var(--border);stroke-width:1}
+.gl.zero{stroke:var(--border2);stroke-width:1.25}
+.ax{fill:var(--text-faint);font:500 10px var(--mono)}
+.xh{stroke:var(--text-faint);stroke-width:1;stroke-dasharray:3 3}
+.legend{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;justify-content:center}
+.lg-item{display:inline-flex;align-items:center;gap:7px;padding:3px 10px;background:none;border:1px solid var(--border);border-radius:99px;font:600 10.5px var(--mono);color:var(--text-dim);cursor:pointer}
+.lg-item i{width:10px;height:3px;border-radius:2px;background:var(--c)}
+.lg-item[aria-pressed=false]{opacity:.4;text-decoration:line-through}
+.lg-item:hover{border-color:var(--border2);color:var(--text)}
+.tip{position:fixed;z-index:60;pointer-events:none;background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:6px 9px;font:500 10.5px/1.5 var(--mono);color:var(--text);white-space:pre;max-width:280px}
+.tip b{display:block;margin-bottom:2px}
+.tip i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;background:var(--c)}
+
+/* ---------- heat map ---------- */
+.heat-wrap{overflow-x:auto;padding-bottom:6px}
+.heat{display:inline-block;position:relative;padding-top:20px}
+.heat-months{position:absolute;top:0;left:34px;height:16px;font:600 11px var(--mono);color:var(--text-faint)}
+.heat-months span{position:absolute;white-space:nowrap}
+.heat-body{display:flex;gap:8px}
+.heat-days{display:grid;grid-template-rows:repeat(7,32px);gap:4px;font:600 10px var(--mono);color:var(--text-faint);width:28px;align-items:center}
+.heat-grid{display:grid;grid-template-rows:repeat(7,32px);grid-auto-flow:column;grid-auto-columns:32px;gap:4px}
+.hc{width:12px;height:12px;border-radius:2px;background:var(--surface3);border:0;padding:0;transition:transform .08s}
+.hc.none{background:transparent;pointer-events:none}
+button.hc{cursor:pointer}
+button.hc:hover{transform:scale(1.45);position:relative;z-index:2}
+.hc.z{box-shadow:inset 0 0 0 1px var(--border2);background:var(--surface2)}
+.hc.p1{background:var(--hp1)} .hc.p2{background:var(--hp2)} .hc.p3{background:var(--hp3)}
+.hc.l1{background:var(--hl1)} .hc.l2{background:var(--hl2)} .hc.l3{background:var(--hl3)}
+.heat-grid .hc{width:32px;height:32px;border-radius:5px;font:700 10.5px var(--mono);display:flex;align-items:center;justify-content:center;color:var(--text-faint);overflow:hidden;line-height:1}
+.heat-grid .hc.p1,.heat-grid .hc.p2,.heat-grid .hc.p3,.heat-grid .hc.l1,.heat-grid .hc.l2,.heat-grid .hc.l3{color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.35)}
+.heat-grid button.hc:hover{transform:scale(1.1)}
+@media (max-width:640px){
+  .heat-grid{grid-template-rows:repeat(7,24px);grid-auto-columns:24px}
+  .heat-grid .hc{width:24px;height:24px;font-size:8.5px;border-radius:4px}
+  .heat-days{grid-template-rows:repeat(7,24px);width:22px}
+}
+.heat-legend{display:flex;align-items:center;gap:4px;font:500 10px var(--mono);color:var(--text-faint);margin-top:8px;justify-content:flex-end;flex-wrap:wrap}
+.heat-legend .hc{display:inline-block}
+
+/* ---------- lists + tables ---------- */
+.tbl{width:100%;border-collapse:collapse;font:500 11.5px var(--mono)}
+.tbl th{position:sticky;top:0;z-index:2;background:var(--surface2);text-align:left;padding:0;border-bottom:1px solid var(--border2);white-space:nowrap}
+.tbl th .th{display:block;width:100%;padding:8px 10px;background:none;border:0;text-align:inherit;font:700 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim)}
+.tbl th button.th{cursor:pointer}
+.tbl th button.th:hover{color:var(--text)}
+.tbl th.r,.tbl td.r{text-align:right}
+.tbl td{padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap;vertical-align:middle}
+.tbl tbody tr:hover{background:var(--surface2)}
+.tbl .ellip{max-width:220px;overflow:hidden;text-overflow:ellipsis;font:400 12px var(--sans);color:var(--text-dim)}
+.tbl .pair{font-weight:700;color:var(--accent)}
+.tbl .act{text-align:right}
+.tbl .act button{background:none;border:0;color:var(--text-faint);cursor:pointer;padding:2px 6px;font:600 11px var(--mono);border-radius:3px}
+.tbl .act button:hover{color:var(--text);background:var(--surface3)}
+.tbl .act button.del:hover{color:var(--neg)}
+.tbl .manual{color:var(--amber);font-size:10px;margin-left:4px}
+.tbl.compact td,.tbl.compact th .th{padding:6px 8px}
+.tbl tr.click{cursor:pointer}
+.table-card{flex:1;min-height:0;display:flex;flex-direction:column;padding:0;overflow:hidden}
+.meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font:500 10.5px var(--mono);color:var(--text-dim)}
+.table-wrap{flex:1;min-height:0;overflow:auto}
+.tr-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.tr-tools .search{width:250px}
+.tr-tools .sel{width:auto;min-width:130px}
+.rank{display:flex;flex-direction:column;gap:3px}
+.rank-row{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 6px;border-radius:5px;background:none;border:0;text-align:left;width:100%;cursor:pointer}
+.rank-row:hover{background:var(--surface2)}
+.rk{width:18px;height:18px;border-radius:4px;display:grid;place-items:center;font:700 10px var(--mono);background:var(--surface3);color:var(--text-faint)}
+.rk.r1{background:var(--amber-dim);color:var(--amber)} .rk.r2{background:var(--surface3);color:var(--text-dim)} .rk.r3{background:rgba(205,127,50,.16);color:#cd7f32}
+.rank-name{font:600 12px var(--sans);display:flex;justify-content:space-between;margin-bottom:4px}
+.rank-name span{font:500 10.5px var(--mono);color:var(--text-faint)}
+.bar{height:4px;border-radius:2px;background:var(--surface3);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:2px;background:var(--accent)}
+.bar i.p{background:var(--pos)} .bar i.n{background:var(--neg)}
+.rank-val{font:700 11.5px var(--mono);min-width:64px;text-align:right}
+.div-row{display:grid;grid-template-columns:44px minmax(0,1fr) 92px;gap:10px;align-items:center;padding:5px 0;font:500 11px var(--mono)}
+.div-track{position:relative;height:14px}
+.div-track::before{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--border2)}
+.div-track i{position:absolute;top:2px;height:10px;border-radius:2px}
+.div-track i.p{left:50%;background:var(--pos)} .div-track i.n{right:50%;background:var(--neg)}
+.div-val{text-align:right}
+.donut-wrap{display:flex;gap:22px;align-items:center;justify-content:center;flex-wrap:wrap;padding:6px 0}
+.donut-legend{display:flex;flex-direction:column;gap:8px;font:500 11.5px var(--mono)}
+.donut-legend div{display:flex;align-items:center;gap:8px}
+.donut-legend i{width:10px;height:10px;border-radius:2px;background:var(--c)}
+.donut-legend span{color:var(--text-faint);margin-left:auto;padding-left:14px}
+
+/* ---------- calculator ---------- */
+.calc{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:10px;align-items:start}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fields .full{grid-column:1/-1}
+.hero-num{font:700 2.4rem/1 var(--mono);letter-spacing:-.02em}
+.hero-unit{font:600 12px var(--mono);color:var(--text-dim);margin-left:8px}
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:5px;overflow:hidden;margin-top:14px}
+.kv div{background:var(--surface);padding:10px 12px}
+.kv dt{font:700 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px}
+.kv dd{font:700 15px var(--mono);margin:0}
+.kv dd small{display:block;font:400 10.5px var(--sans);color:var(--text-faint);margin-top:2px}
+
+/* ---------- dialogs + toast ---------- */
+dialog{background:var(--surface);color:var(--text);border:1px solid var(--border2);border-radius:7px;padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:hidden}
+dialog[open]{display:flex;flex-direction:column}
+dialog[open] > form{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+dialog::backdrop{background:rgba(5,5,10,.66)}
+.dlg-h{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border);font:700 11px var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.dlg-b{flex:1 1 auto;min-height:0;padding:16px 18px;overflow-y:auto}
+.dlg-f{flex:0 0 auto;display:flex;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid var(--border);background:var(--surface2)}
+.dlg-x{background:none;border:0;color:var(--text-dim);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:3px}
+.dlg-x:hover{color:var(--text);background:var(--surface3)}
+.help h3{font:700 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);border-left:2px solid var(--accent);padding-left:8px;margin:16px 0 8px}
+.help h3:first-child{margin-top:0}
+.help p,.help li{font-size:12.5px;color:var(--text-dim);line-height:1.55}
+.help ul{padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.help code,.help kbd{font:600 11px var(--mono);background:var(--surface3);padding:1px 5px;border-radius:3px;color:var(--text)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--surface3);border:1px solid var(--border2);border-radius:99px;padding:8px 16px;font:500 11px var(--mono);letter-spacing:.04em;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:80;max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.scrim{display:none}
+
+/* ---------- responsive ---------- */
+@media (max-width:1180px){
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g21,.calc{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .menu-btn{display:inline-flex}
+  .side{position:fixed;z-index:40;top:48px;bottom:0;left:0;width:min(300px,86vw);transform:translateX(-100%);transition:transform .2s}
+  .side.open{transform:none}
+  .scrim.show{display:block;position:fixed;inset:48px 0 0 0;z-index:30;background:rgba(5,5,10,.55)}
+  .g2{grid-template-columns:minmax(0,1fr)}
+  .hide-sm{display:none}
+  .pings{display:none}
+  .toolbar,.view{padding-left:12px;padding-right:12px}
+  .tr-tools .search{width:100%}
+}
+@media (max-width:520px){
+  .kpis{gap:8px}
+  .stat-val{font-size:1.25rem}
+  .fields{grid-template-columns:1fr}
+  .kv{grid-template-columns:1fr}
+  .hero-num{font-size:2rem}
+  .brand span.long{display:none}
+  .nav-tabs button{padding:5px 10px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media print{
+  body{height:auto;overflow:visible;background:#fff}
+  .side,.toolbar,.hdr,.toast{display:none}
+  .app{display:block}.view{position:static;overflow:visible}
+}
+
+</style>
+</head>
+<body>
+<div id="gate" class="hidden">
+  <div class="gate-card" id="gate-card">
+    <div class="gate-brand">FX Journal</div>
+    <div class="gate-sub" id="gate-sub">Sign in to sync your trades to the cloud.</div>
+    <div class="gate-tabs" role="tablist" id="gate-tabs">
+      <button type="button" data-gate-tab="signin" aria-selected="true">Sign in</button>
+      <button type="button" data-gate-tab="signup" aria-selected="false">Create account</button>
+    </div>
+    <form id="f-gate" novalidate data-mode="signin">
+      <div class="gate-field">
+        <label class="lbl" for="g-email">Email</label>
+        <input class="inp" type="email" id="g-email" autocomplete="email" required>
+      </div>
+      <div class="gate-field">
+        <label class="lbl" for="g-pass">Password</label>
+        <input class="inp" type="password" id="g-pass" autocomplete="current-password" minlength="6" required>
+      </div>
+      <div class="note error" id="gate-err" hidden></div>
+      <div class="note" id="gate-msg" hidden></div>
+      <button class="btn btn-blue" type="submit" id="gate-submit" style="width:100%;justify-content:center;margin-top:4px">Sign in</button>
+    </form>
+    <div class="gate-loading hidden" id="gate-loading">Loading…</div>
+  </div>
+</div>
+<div class="app">
+  <header class="hdr">
+    <button class="btn btn-sm menu-btn" data-action="menu" aria-label="Open filters and data menu" aria-controls="side">?</button>
+    <div class="brand">FX Journal<span class="tag">v1.0</span></div>
+    <span class="vsep"></span>
+    <div class="pings" role="status" aria-label="Status">
+      <span class="ping"><i class="dot" id="pingData"></i><span id="pingDataTxt">Data</span></span>
+      <span class="ping"><i class="dot" id="pingSave"></i><span id="pingSaveTxt">Saved in this browser</span></span>
+    </div>
+    <div class="hdr-actions">
+      <button class="btn btn-blue" data-action="add" title="Add trade (N)">+<span class="hide-sm">&nbsp;Add trade</span><span class="sr"> Add trade</span></button>
+      <button class="btn t-green hide-sm" data-action="export">? Export CSV</button>
+      <button class="btn" data-action="settings" aria-label="Settings">?<span class="hide-sm">&nbsp;Settings</span></button>
+      <button class="btn" data-action="help" aria-label="Help">?<span class="hide-sm">&nbsp;Help</span></button>
+      <button class="btn" data-action="theme" aria-label="Switch light or dark theme">?</button>
+      <button class="btn hide-sm" data-action="signout" id="btn-signout" hidden>Sign out</button>
+    </div>
+  </header>
+
+  <aside class="side" id="side" aria-label="Filters and data">
+    <div class="side-group">
+      <div class="section-title">Scope</div>
+      <div class="seg" role="radiogroup" aria-label="Trade side">
+        <input type="radio" name="scope" id="sc-all" value="all" checked><label for="sc-all">All</label>
+        <input type="radio" name="scope" id="sc-long" value="long"><label for="sc-long">Long</label>
+        <input type="radio" name="scope" id="sc-short" value="short"><label for="sc-short">Short</label>
+      </div>
+    </div>
+
+    <div class="side-group">
+      <div class="section-title">Date range</div>
+      <div class="row">
+        <div style="flex:1"><label class="sr" for="d-from">From</label><input class="inp" type="date" id="d-from"></div>
+        <div style="flex:1"><label class="sr" for="d-to">To</label><input class="inp" type="date" id="d-to"></div>
+      </div>
+      <div class="presets" role="group" aria-label="Date presets">
+        <button class="chip" data-preset="7d" aria-pressed="false">7D</button>
+        <button class="chip" data-preset="30d" aria-pressed="false">30D</button>
+        <button class="chip" data-preset="90d" aria-pressed="false">90D</button>
+        <button class="chip" data-preset="ytd" aria-pressed="false">YTD</button>
+        <button class="chip" data-preset="all" aria-pressed="true">ALL</button>
+      </div>
+      <p class="hint">Presets count back from your latest trade.</p>
+    </div>
+
+    <div class="side-group">
+      <div class="section-title">Data</div>
+      <div class="stack">
+        <button class="upload-box" data-action="import"><span class="g">?</span><span>Import CSV<small>Date, Account Size, Side, PnL</small></span></button>
+        <div class="row">
+          <button class="btn btn-sm" data-action="export" style="flex:1;justify-content:center">? Export CSV</button>
+          <button class="btn btn-sm t-cyan" data-action="sample" style="flex:1;justify-content:center">Load sample</button>
+        </div>
+        <button class="btn btn-sm t-red" data-action="clear" style="justify-content:center">? Clear journal</button>
+      </div>
+    </div>
+
+    <div class="session" aria-label="Session summary">
+      <div><span>Trades</span><span id="s-trades">0</span></div>
+      <div><span>In view</span><span id="s-view">0</span></div>
+      <div><span>Balance</span><span id="s-bal">—</span></div>
+      <div><span>Last trade</span><span id="s-last">—</span></div>
+      <div><span>Storage</span><span id="s-store">Browser</span></div>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim" data-action="menu-close"></div>
+
+  <main class="main">
+    <div class="toolbar">
+      <div class="nav-tabs" role="tablist" aria-label="Sections">
+        <button role="tab" id="tab-dash" data-tab="dash" aria-selected="true" aria-controls="v-dash">Dashboard</button>
+        <button role="tab" id="tab-trades" data-tab="trades" aria-selected="false" aria-controls="v-trades">Trades</button>
+        <button role="tab" id="tab-calc" data-tab="calc" aria-selected="false" aria-controls="v-calc">Calculator</button>
+        <button role="tab" id="tab-analytics" data-tab="analytics" aria-selected="false" aria-controls="v-analytics">Analytics</button>
+        <button role="tab" id="tab-summary" data-tab="summary" aria-selected="false" aria-controls="v-summary">Summary</button>
+      </div>
+      <span class="scope-note" id="scopeNote" aria-live="polite"></span>
+    </div>
+
+    <div class="views">
+      <section class="view" id="v-dash" role="tabpanel" aria-labelledby="tab-dash"></section>
+
+      <section class="view fixed" id="v-trades" role="tabpanel" aria-labelledby="tab-trades" hidden>
+        <div class="tr-tools">
+          <label class="sr" for="t-q">Search trades</label>
+          <input class="inp search" type="search" id="t-q" placeholder="Search pair, strategy, notes…  ( / )" autocomplete="off">
+          <label class="sr" for="t-asset">Filter by market</label>
+          <select class="sel" id="t-asset">
+            <option value="">Forex &amp; crypto</option><option value="forex">Forex</option><option value="crypto">Crypto</option>
+          </select>
+          <label class="sr" for="t-pair">Filter by pair</label><select class="sel" id="t-pair"></select>
+          <label class="sr" for="t-tag">Filter by strategy</label><select class="sel" id="t-tag"></select>
+          <label class="sr" for="t-out">Filter by outcome</label>
+          <select class="sel" id="t-out">
+            <option value="">All outcomes</option><option value="win">Wins</option><option value="loss">Losses</option><option value="be">Break-even</option>
+          </select>
+          <button class="btn btn-sm" data-action="clear-tfilters">? Clear</button>
+        </div>
+        <div class="card table-card">
+          <div class="meta">
+            <span id="t-count">No trades</span>
+            <span id="t-chips"></span>
+            <span class="grow"></span>
+            <span id="t-pager" class="row" hidden>
+              <button class="btn btn-sm" data-action="pg-prev" aria-label="Previous page">?</button>
+              <span id="t-pg" aria-live="polite"></span>
+              <button class="btn btn-sm" data-action="pg-next" aria-label="Next page">?</button>
+            </span>
+            <label class="sr" for="t-per">Rows per page</label>
+            <select class="sel" id="t-per" style="width:auto;padding:3px 22px 3px 8px;font-size:10.5px">
+              <option value="25">25 / page</option><option value="50" selected>50 / page</option>
+              <option value="100">100 / page</option><option value="250">250 / page</option><option value="0">All</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table class="tbl" id="t-table"><thead id="t-head"></thead><tbody id="t-body"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="v-calc" role="tabpanel" aria-labelledby="tab-calc" hidden>
+        <div class="calc">
+          <div class="card">
+            <div class="card-title">Position size</div>
+            <div class="fields">
+              <div class="full">
+                <span class="lbl" id="c-type-lbl">Market</span>
+                <div class="seg" role="radiogroup" aria-labelledby="c-type-lbl">
+                  <input type="radio" name="c-type" id="c-type-forex" value="forex" checked><label for="c-type-forex">Forex</label>
+                  <input type="radio" name="c-type" id="c-type-crypto" value="crypto"><label for="c-type-crypto">Crypto</label>
+                </div>
+              </div>
+              <div class="full">
+                <label class="lbl" for="c-pair" id="c-pair-lbl">Currency pair</label>
+                <input class="inp" id="c-pair" list="dl-majors" value="USDCAD" autocomplete="off" maxlength="16">
+                <div class="hint" id="c-pair-hint"></div>
+              </div>
+              <div class="full">
+                <span class="lbl" id="c-side-lbl">Side</span>
+                <div class="seg" role="radiogroup" aria-labelledby="c-side-lbl">
+                  <input type="radio" name="c-side" id="c-long" value="long" checked><label for="c-long">Long</label>
+                  <input type="radio" name="c-side" id="c-short" value="short"><label for="c-short">Short</label>
+                </div>
+              </div>
+              <div>
+                <label class="lbl" for="c-bal">Account balance</label>
+                <input class="inp" type="number" step="any" min="0" id="c-bal" inputmode="decimal">
+              </div>
+              <div>
+                <label class="lbl" for="c-risk">Max loss per trade (%)</label>
+                <input class="inp" type="number" step="any" min="0" id="c-risk" inputmode="decimal">
+              </div>
+              <div class="full hint" id="c-bal-hint" style="margin-top:-6px"></div>
+              <div>
+                <label class="lbl" for="c-entry">Entry price</label>
+                <input class="inp" type="number" step="any" min="0" id="c-entry" inputmode="decimal" placeholder="1.35000">
+              </div>
+              <div>
+                <label class="lbl" for="c-stop">Stop loss price</label>
+                <input class="inp" type="number" step="any" min="0" id="c-stop" inputmode="decimal" placeholder="1.34500">
+              </div>
+              <div>
+                <label class="lbl" for="c-exit">Exit / target price (optional)</label>
+                <input class="inp" type="number" step="any" min="0" id="c-exit" inputmode="decimal" placeholder="For a P&amp;L preview">
+              </div>
+              <div>
+                <label class="lbl" for="c-lev">Leverage (1 : N)</label>
+                <input class="inp" type="number" step="any" min="1" id="c-lev" inputmode="decimal">
+              </div>
+              <div>
+                <label class="lbl" for="c-used" id="c-used-lbl">Lots used (optional)</label>
+                <input class="inp" type="number" step="any" min="0" id="c-used" inputmode="decimal" placeholder="Use recommended">
+              </div>
+              <div class="full" id="c-rate-wrap" hidden>
+                <label class="lbl" for="c-rate" id="c-rate-lbl">Conversion rate</label>
+                <input class="inp" type="number" step="any" min="0" id="c-rate" inputmode="decimal">
+              </div>
+              <div>
+                <label class="lbl" for="c-step" id="c-step-lbl">Lot step</label>
+                <select class="sel" id="c-step"><option value="0.01" selected>0.01 (micro)</option><option value="0.1">0.1</option><option value="1">1.0</option><option value="0.001">0.001</option><option value="0.0001">0.0001</option></select>
+              </div>
+            </div>
+          </div>
+          <div class="card" aria-live="polite">
+            <div class="card-title">Result</div>
+            <div id="calc-out"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="v-analytics" role="tabpanel" aria-labelledby="tab-analytics" hidden></section>
+
+      <section class="view" id="v-summary" role="tabpanel" aria-labelledby="tab-summary" hidden></section>
+    </div>
+  </main>
+</div>
+
+<datalist id="dl-majors"><option value="EURUSD"><option value="GBPUSD"><option value="USDJPY"><option value="USDCHF"><option value="USDCAD"><option value="AUDUSD"><option value="NZDUSD"><option value="EURGBP"><option value="EURJPY"><option value="GBPJPY"></datalist>
+<datalist id="dl-crypto"><option value="BTCUSDT"><option value="ETHUSDT"><option value="SOLUSDT"><option value="BNBUSDT"><option value="XRPUSDT"><option value="ADAUSDT"><option value="DOGEUSDT"></datalist>
+<datalist id="dl-pairs"></datalist>
+<datalist id="dl-tf"><option value="1min"><option value="5min"><option value="15min"><option value="30min"><option value="45min"><option value="1H"><option value="4H"><option value="1D"></datalist>
+<datalist id="dl-tags"></datalist>
+<input type="file" id="file-in" accept=".csv,text/csv,text/plain" hidden>
+
+<!-- add / edit trade -->
+<dialog id="dlg-trade" aria-labelledby="dt-title">
+  <form id="f-trade" novalidate>
+    <div class="dlg-h"><span id="dt-title">Add trade</span><button type="button" class="dlg-x" data-action="close-dlg" aria-label="Close">?</button></div>
+    <div class="dlg-b">
+      <div class="fields">
+        <div>
+          <label class="lbl" for="f-date">Date closed</label>
+          <input class="inp" type="date" id="f-date" required>
+          <div class="err" id="e-date" hidden></div>
+        </div>
+        <div class="full">
+          <span class="lbl" id="f-market-lbl">Market</span>
+          <div class="seg" role="radiogroup" aria-labelledby="f-market-lbl">
+            <input type="radio" name="f-market" id="f-forex" value="forex" checked><label for="f-forex">Forex</label>
+            <input type="radio" name="f-market" id="f-crypto" value="crypto"><label for="f-crypto">Crypto</label>
+          </div>
+        </div>
+        <div>
+          <label class="lbl" for="f-pair" id="f-pair-lbl">Pair</label>
+          <input class="inp" id="f-pair" list="dl-pairs" placeholder="USDCAD" autocomplete="off" maxlength="16">
+        </div>
+        <div>
+          <label class="lbl" for="f-tf">Time frame traded</label>
+          <input class="inp" id="f-tf" list="dl-tf" placeholder="15min, 45min, 1H…" autocomplete="off" maxlength="20">
+        </div>
+        <div class="full">
+          <span class="lbl" id="f-side-lbl">Side</span>
+          <div class="row" role="radiogroup" aria-labelledby="f-side-lbl">
+            <div class="seg long" style="flex:1"><input type="radio" name="f-side" id="f-long" value="long"><label for="f-long">Long</label></div>
+            <div class="seg short" style="flex:1"><input type="radio" name="f-side" id="f-short" value="short"><label for="f-short">Short</label></div>
+          </div>
+          <div class="err" id="e-side" hidden></div>
+        </div>
+        <div>
+          <label class="lbl" for="f-pnl">Profit / loss</label>
+          <div class="row" style="gap:6px">
+            <input class="inp" type="number" step="any" id="f-pnl" inputmode="decimal" placeholder="45.50 or -20" style="flex:1">
+            <button type="button" class="btn btn-sm" data-action="calc-pnl" title="Auto-calculate from lots, entry and exit">Auto ?</button>
+          </div>
+          <div class="hint">Type it in yourself, or fill in Lots, Entry and Exit below and tap Auto.</div>
+          <div class="err" id="e-pnl" hidden></div>
+        </div>
+        <div>
+          <label class="lbl" for="f-acct">Account size at entry</label>
+          <input class="inp" type="number" step="any" min="0" id="f-acct" inputmode="decimal">
+          <div class="hint">Optional. Leave blank to use balance plus earlier P&amp;L.</div>
+          <div class="err" id="e-acct" hidden></div>
+        </div>
+        <div class="full">
+          <details id="f-more">
+            <summary class="lbl" style="cursor:pointer;margin:0">More details (optional)</summary>
+            <div class="fields" style="margin-top:12px">
+              <div><label class="lbl" for="f-lots">Lots</label><input class="inp" type="number" step="any" min="0" id="f-lots" inputmode="decimal"></div>
+              <div><label class="lbl" for="f-risk">Risk amount</label><input class="inp" type="number" step="any" min="0" id="f-risk" inputmode="decimal"></div>
+              <div><label class="lbl" for="f-entry">Entry price</label><input class="inp" type="number" step="any" min="0" id="f-entry" inputmode="decimal"></div>
+              <div><label class="lbl" for="f-exit">Exit price</label><input class="inp" type="number" step="any" min="0" id="f-exit" inputmode="decimal"></div>
+              <div><label class="lbl" for="f-stop">Stop loss</label><input class="inp" type="number" step="any" min="0" id="f-stop" inputmode="decimal"></div>
+              <div class="full">
+                <span class="lbl" id="f-ssb-lbl">Screenshot taken before trade?</span>
+                <div class="seg" role="radiogroup" aria-labelledby="f-ssb-lbl">
+                  <input type="radio" name="f-ssb" id="f-ssb-yes" value="yes"><label for="f-ssb-yes">Yes</label>
+                  <input type="radio" name="f-ssb" id="f-ssb-no" value="no" checked><label for="f-ssb-no">No</label>
+                </div>
+              </div>
+              <div class="full">
+                <span class="lbl" id="f-ssa-lbl">Screenshot taken after trade?</span>
+                <div class="seg" role="radiogroup" aria-labelledby="f-ssa-lbl">
+                  <input type="radio" name="f-ssa" id="f-ssa-yes" value="yes"><label for="f-ssa-yes">Yes</label>
+                  <input type="radio" name="f-ssa" id="f-ssa-no" value="no" checked><label for="f-ssa-no">No</label>
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+        <div class="full">
+          <label class="lbl" for="f-tag">Strategy</label>
+          <input class="inp" id="f-tag" list="dl-tags" placeholder="Breakout, pullback…" autocomplete="off" maxlength="40">
+        </div>
+        <div class="full">
+          <label class="lbl" for="f-notes">Notes</label>
+          <textarea class="txt" id="f-notes" rows="3" placeholder="Why you took it, what you saw, what to repeat or avoid."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="dlg-f">
+      <button type="button" class="btn" data-action="close-dlg">Cancel</button>
+      <button type="submit" class="btn btn-blue">Save trade</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- settings -->
+<dialog id="dlg-settings" aria-labelledby="ds-title">
+  <form id="f-settings" novalidate>
+    <div class="dlg-h"><span id="ds-title">Settings</span><button type="button" class="dlg-x" data-action="close-dlg" aria-label="Close">?</button></div>
+    <div class="dlg-b">
+      <div class="fields">
+        <div>
+          <label class="lbl" for="s-start">Starting balance</label>
+          <input class="inp" type="number" step="any" min="0" id="s-start" inputmode="decimal">
+          <div class="err" id="e-start" hidden></div>
+        </div>
+        <div>
+          <label class="lbl" for="s-cur">Account currency</label>
+          <input class="inp" id="s-cur" maxlength="3" autocomplete="off" placeholder="USD">
+          <div class="err" id="e-cur" hidden></div>
+        </div>
+        <div>
+          <label class="lbl" for="s-risk">Default max loss (%)</label>
+          <input class="inp" type="number" step="any" min="0" id="s-risk" inputmode="decimal">
+        </div>
+        <div>
+          <label class="lbl" for="s-lev">Default leverage (1 : N)</label>
+          <input class="inp" type="number" step="any" min="1" id="s-lev" inputmode="decimal">
+        </div>
+        <div>
+          <label class="lbl" for="s-per">Sharpe periods per year</label>
+          <select class="sel" id="s-per"><option value="252">252 (forex, weekdays)</option><option value="260">260 (all weekdays)</option><option value="365">365 (7 days a week)</option></select>
+        </div>
+        <div>
+          <label class="lbl" for="s-rf">Risk-free rate (% a year)</label>
+          <input class="inp" type="number" step="any" min="0" id="s-rf" inputmode="decimal">
+        </div>
+        <div class="full">
+          <label class="lbl" for="s-mode">Sharpe counts</label>
+          <select class="sel" id="s-mode"><option value="all">Every calendar day, flat days as 0</option><option value="active">Only days with trades (original workbook method)</option></select>
+        </div>
+        <div class="full hint" style="margin:0">Starting balance sets the account size for trades where you left it blank. A trade with its own account size restarts the running balance from that point.</div>
+      </div>
+    </div>
+    <div class="dlg-f">
+      <button type="button" class="btn" data-action="close-dlg">Cancel</button>
+      <button type="submit" class="btn btn-blue">Save settings</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- help -->
+<dialog id="dlg-help" aria-labelledby="dh-title" style="width:min(640px,calc(100vw - 24px))">
+  <div class="dlg-h"><span id="dh-title">How it works</span><button type="button" class="dlg-x" data-action="close-dlg" aria-label="Close">?</button></div>
+  <div class="dlg-b help">
+    <h3>Your data</h3>
+    <p>Everything stays in this browser. Nothing is uploaded. Clearing site data removes the journal, so export a CSV now and then as a backup.</p>
+    <h3>Keyboard</h3>
+    <ul>
+      <li><kbd>N</kbd> add a trade &nbsp; <kbd>/</kbd> search trades &nbsp; <kbd>1</kbd>–<kbd>5</kbd> switch section</li>
+      <li><kbd>1</kbd> Dashboard &nbsp; <kbd>2</kbd> Trades &nbsp; <kbd>3</kbd> Calculator &nbsp; <kbd>4</kbd> Analytics &nbsp; <kbd>5</kbd> Summary</li>
+      <li><kbd>Ctrl</kbd>/<kbd>?</kbd> + <kbd>Enter</kbd> saves the trade form</li>
+    </ul>
+    <h3>How numbers are worked out</h3>
+    <ul>
+      <li><b>Return</b> = P&amp;L ÷ account size at entry. Every trade gets one.</li>
+      <li><b>Total return</b> adds trade returns. <b>Compounded</b> multiplies each day's return.</li>
+      <li><b>Win rate</b> = winning trades ÷ all trades. Break-even trades count as neither win nor loss.</li>
+      <li><b>Payoff ratio</b> = average winning return ÷ average losing return.</li>
+      <li><b>Profit factor</b> = gross profit ÷ gross loss. <b>Expectancy</b> = average P&amp;L per trade.</li>
+      <li><b>Max drawdown</b> = biggest fall from a balance peak, using starting balance plus P&amp;L.</li>
+      <li><b>Sharpe</b> = average daily return ÷ its standard deviation × vperiods per year (change in Settings).</li>
+    </ul>
+    <h3>Import format</h3>
+    <p>CSV with a header row containing <code>Date</code>, <code>Side</code> (Long or Short) and <code>PnL</code>. Optional: <code>Account Size</code>, <code>Pair</code>, <code>Asset Type</code> (Forex or Crypto), <code>Time Frame</code>, <code>Lots</code>, <code>Entry</code>, <code>Exit</code>, <code>Stop</code>, <code>Risk</code>, <code>Screenshot Before</code>, <code>Screenshot After</code>, <code>Strategy</code>, <code>Notes</code>. Dates read as YYYY-MM-DD, M/D/YYYY or D.M.YYYY. Semicolon files with decimal commas work too.</p>
+  </div>
+  <div class="dlg-f"><button type="button" class="btn btn-blue" data-action="close-dlg">Got it</button></div>
+</dialog>
+
+<!-- confirm / notice -->
+<dialog id="dlg-confirm" aria-labelledby="dc-title" style="width:min(460px,calc(100vw - 24px))">
+  <form method="dialog">
+    <div class="dlg-h"><span id="dc-title">Confirm</span></div>
+    <div class="dlg-b help" id="dc-msg"></div>
+    <div class="dlg-f">
+      <button value="cancel" class="btn" id="dc-cancel">Cancel</button>
+      <button value="ok" class="btn btn-blue" id="dc-ok">OK</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="tip" id="tip" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ==========================================================================
+   ENGINE — pure functions, no DOM. Logic decoded from the MTG workbook spec
+   (return = PnL / account size, daily + cumulative series, win rate, payoff,
+   Sharpe, risk-based position size) plus the recommended v2 fixes
+   (every trade counted, real date spine, profit factor, expectancy,
+   max drawdown, margin in account currency).
+   ========================================================================== */
+const isNum = x => typeof x === 'number' && Number.isFinite(x);
+const sum = xs => { let s = 0; for (const x of xs) s += x; return s; };
+const avg = xs => (xs.length ? sum(xs) / xs.length : null);
+
+/* ---------- dates (whole calendar days, ISO YYYY-MM-DD) ---------- */
+function isIso(s) {
+  if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const y = +s.slice(0, 4);
+  if (y < 1990 || y > 2100) return false;
+  const d = new Date(s + 'T00:00:00Z');
+  return !isNaN(d) && d.toISOString().slice(0, 10) === s;
+}
+function addDays(iso, n) {
+  const d = new Date(iso + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function dayDiff(a, b) {
+  return Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 864e5);
+}
+function dow(iso) { return new Date(iso + 'T00:00:00Z').getUTCDay(); } // 0 = Sunday
+
+/* ---------- enrich: equity at entry, % return, R multiple ----------
+   Order = date, then the order trades were logged. Auto account size is
+   starting balance + PnL of every earlier trade. A manual account size on a
+   trade overrides it and re-bases the running balance from that trade on. */
+const TRADE_NO_BASE = 32500;
+const tradeNoOf = seq => TRADE_NO_BASE + Math.max(0, (seq || 1) - 1);
+function enrich(trades, startBalance) {
+  const sorted = trades.slice().sort((a, b) =>
+    a.date < b.date ? -1 : a.date > b.date ? 1 : (a.seq || 0) - (b.seq || 0));
+  let eq = startBalance;
+  return sorted.map(t => {
+    const manual = isNum(t.accountSize) && t.accountSize > 0;
+    if (manual) eq = t.accountSize;
+    const equity = eq;
+    const ret = isNum(t.pnl) && equity > 0 ? t.pnl / equity : null;
+    const rMult = isNum(t.risk) && t.risk > 0 && isNum(t.pnl) ? t.pnl / t.risk : null;
+    eq += isNum(t.pnl) ? t.pnl : 0;
+    return Object.assign({}, t, { equity, equityAuto: !manual, ret, rMult, tradeNo: tradeNoOf(t.seq) });
+  });
+}
+
+/* ---------- daily + cumulative series (Longs / Shorts / Total) ----------
+   Spine = first trade date .. last trade date, every calendar day.
+   A day whose returns net to exactly 0 is blank (null), as in the workbook. */
+function dailySeries(list) {
+  if (!list.length) return [];
+  let min = list[0].date, max = list[0].date;
+  const by = new Map();
+  for (const t of list) {
+    if (t.date < min) min = t.date;
+    if (t.date > max) max = t.date;
+    if (!isNum(t.ret)) continue;
+    let o = by.get(t.date);
+    if (!o) { o = { l: 0, s: 0, t: 0 }; by.set(t.date, o); }
+    o.t += t.ret;
+    if (t.side === 'long') o.l += t.ret; else if (t.side === 'short') o.s += t.ret;
+  }
+  const rows = [];
+  let cl = 0, cs = 0, ct = 0, pl = 1, ps = 1, pt = 1;
+  for (let d = min; d <= max; d = addDays(d, 1)) {
+    const o = by.get(d);
+    const longs = o && o.l !== 0 ? o.l : null;
+    const shorts = o && o.s !== 0 ? o.s : null;
+    const total = o && o.t !== 0 ? o.t : null;
+    cl += longs ?? 0; cs += shorts ?? 0; ct += total ?? 0;
+    pl *= 1 + (longs ?? 0); ps *= 1 + (shorts ?? 0); pt *= 1 + (total ?? 0);
+    rows.push({
+      date: d, longs, shorts, total,
+      cumLongs: cl, cumShorts: cs, cumTotal: ct,
+      cpLongs: pl - 1, cpShorts: ps - 1, cpTotal: pt - 1,
+    });
+  }
+  return rows;
+}
+
+/* ---------- net PnL per calendar day (for the calendar heat map) ---------- */
+function dayPnl(list) {
+  const m = new Map();
+  for (const t of list) {
+    let o = m.get(t.date);
+    if (!o) { o = { pnl: 0, ret: 0, n: 0 }; m.set(t.date, o); }
+    o.pnl += isNum(t.pnl) ? t.pnl : 0;
+    o.ret += isNum(t.ret) ? t.ret : 0;
+    o.n += 1;
+  }
+  return m;
+}
+
+/* ---------- statistics block (workbook G23:J29 + v2 additions) ---------- */
+function stats(list) {
+  const n = list.length;
+  const pnls = list.map(t => t.pnl).filter(isNum);
+  const totalPnl = sum(pnls);
+  const rets = list.map(t => t.ret).filter(isNum);
+  const totalReturn = sum(rets);
+  const ds = dailySeries(list);
+  const compounded = ds.length ? ds[ds.length - 1].cpTotal : null;
+  const wins = pnls.filter(p => p > 0).length;
+  const losses = pnls.filter(p => p < 0).length;
+  const be = n - wins - losses;
+  const w = rets.filter(r => r > 0), l = rets.filter(r => r < 0);
+  const avgWin = avg(w), avgLoss = avg(l);
+  const payoff = avgWin !== null && avgLoss !== null && avgLoss !== 0 ? avgWin / Math.abs(avgLoss) : null;
+  const grossProfit = sum(pnls.filter(p => p > 0));
+  const grossLoss = Math.abs(sum(pnls.filter(p => p < 0)));
+  return {
+    n, totalPnl, totalReturn, compounded,
+    avgReturn: n ? totalReturn / n : null,
+    wins, losses, be,
+    winRate: n ? wins / n : null,
+    avgWin, avgLoss, payoff,
+    grossProfit, grossLoss,
+    profitFactor: grossLoss === 0 ? null : grossProfit / grossLoss,
+    expectancy: n ? totalPnl / n : null,
+  };
+}
+
+/* ---------- max drawdown on the money equity curve ----------
+   equity = starting balance + cumulative PnL, in logged order. */
+function drawdown(list, start) {
+  let e = start, peak = start, worst = 0, wPeak = start, wTrough = start;
+  const byDay = new Map();
+  for (const t of list) {
+    e += isNum(t.pnl) ? t.pnl : 0;
+    if (e > peak) peak = e;
+    const dd = peak > 0 ? (e - peak) / peak : 0;
+    if (dd < worst) { worst = dd; wPeak = peak; wTrough = e; }
+    const o = byDay.get(t.date);
+    if (!o) byDay.set(t.date, { min: dd, end: dd, equity: e });
+    else { o.end = dd; o.equity = e; if (dd < o.min) o.min = dd; }
+  }
+  const rows = [];
+  if (list.length) {
+    let min = list[0].date, max = list[0].date;
+    for (const t of list) { if (t.date < min) min = t.date; if (t.date > max) max = t.date; }
+    let carry = 0, carryEq = start;
+    for (let d = min; d <= max; d = addDays(d, 1)) {
+      const o = byDay.get(d);
+      if (o) { rows.push({ date: d, dd: o.min, equity: o.equity }); carry = o.end; carryEq = o.equity; }
+      else rows.push({ date: d, dd: carry, equity: carryEq });
+    }
+  }
+  return { maxDd: worst, peak: wPeak, trough: wTrough, rows };
+}
+
+/* ---------- Sharpe ----------
+   Default: every calendar day between first and last trade counts, flat = 0.
+   activeOnly reproduces the workbook (only days that had trades).
+   null (never Infinity/NaN) when < 2 observations or st. dev. = 0. */
+function sharpe(series, periodsPerYear = 252, rf = 0, activeOnly = false) {
+  const xs = activeOnly ? series.filter(isNum) : series.map(x => x ?? 0);
+  const n = xs.length;
+  if (n < 2) return { mean: null, std: null, sharpe: null, n };
+  const m = sum(xs) / n;
+  const sd = Math.sqrt(sum(xs.map(x => (x - m) ** 2)) / (n - 1));
+  if (sd === 0) return { mean: m, std: 0, sharpe: null, n };
+  const rfp = rf / periodsPerYear;
+  return { mean: m, std: sd, sharpe: ((m - rfp) / sd) * Math.sqrt(periodsPerYear), n };
+}
+
+/* ---------- group-by (weekday, pair, strategy) ---------- */
+function groupStats(list, keyFn) {
+  const g = new Map();
+  for (const t of list) {
+    const k = keyFn(t);
+    let o = g.get(k);
+    if (!o) { o = { key: k, n: 0, pnl: 0, ret: 0, wins: 0 }; g.set(k, o); }
+    o.n++;
+    o.pnl += isNum(t.pnl) ? t.pnl : 0;
+    o.ret += isNum(t.ret) ? t.ret : 0;
+    if (t.pnl > 0) o.wins++;
+  }
+  return [...g.values()].map(o => Object.assign(o, { winRate: o.n ? o.wins / o.n : null }));
+}
+
+/* ==========================================================================
+   POSITION SIZE CALCULATOR (v2)
+   size = risk amount / loss per unit if stopped out, in account currency.
+   ========================================================================== */
+function parsePair(str) {
+  const s = String(str || '').toUpperCase().replace(/[^A-Z]/g, '');
+  return s.length === 6 ? { base: s.slice(0, 3), quote: s.slice(3), sym: s } : null;
+}
+const decimalsOf = step => (String(step).split('.')[1] || '').length;
+
+function calcPosition(i) {
+  const info = m => ({ ok: false, level: 'info', message: m });
+  const bad = m => ({ ok: false, level: 'error', message: m });
+  if (!(i.balance > 0)) return info('Enter an account balance above 0.');
+  if (!(i.riskPct > 0)) return info('Enter the maximum loss per trade as a percentage above 0.');
+  if (!(i.leverage >= 1)) return info('Enter leverage of 1 or more (50 means 1:50).');
+  const pair = parsePair(i.pair);
+  if (!pair) return info('Enter a 6-letter currency pair such as USDCAD.');
+  if (!isNum(i.entry) || !isNum(i.stop)) return info('Enter an entry price and a stop loss price.');
+  if (!(i.entry > 0) || !(i.stop > 0)) return bad('Prices must be above 0.');
+  // Guard messages kept verbatim from the workbook
+  if (i.side === 'long' && !(i.entry > i.stop))
+    return bad('For a long position, entry price has to be higher than stop loss price.');
+  if (i.side === 'short' && !(i.stop > i.entry))
+    return bad('For a short position, entry price has to be lower than stop loss price.');
+
+  const acct = String(i.currency || 'USD').toUpperCase();
+  const kind = pair.quote === acct ? 'quote_is_account' : pair.base === acct ? 'base_is_account' : 'cross';
+  if (kind === 'cross' && !(i.rate > 0))
+    return info(`${pair.sym} does not include ${acct}. Enter how many ${acct} one ${pair.quote} is worth.`);
+
+  const pipSize = pair.quote === 'JPY' ? 0.01 : 0.0001;
+  const contract = 100000;
+  const dist = Math.abs(i.entry - i.stop);
+  const q2a = kind === 'quote_is_account' ? 1 : kind === 'base_is_account' ? 1 / i.entry : i.rate;
+  const baseToAccount = kind === 'quote_is_account' ? i.entry : kind === 'base_is_account' ? 1 : i.rate * i.entry;
+
+  const riskAmount = i.balance * (i.riskPct / 100);
+  const lossPerUnit = dist * q2a;
+  const units = riskAmount / lossPerUnit;
+  const lotsExact = units / contract;
+  const step = i.lotStep > 0 ? i.lotStep : 0.01;
+  const dp = decimalsOf(step);
+  const lotsRounded = Number((Math.floor(lotsExact / step + 1e-9) * step).toFixed(dp));
+  const custom = isNum(i.lotsUsed) && i.lotsUsed > 0;
+  const lotsUsed = custom ? i.lotsUsed : lotsRounded;
+
+  const riskAtUsed = lotsUsed * contract * lossPerUnit;
+  const notional = lotsUsed * contract * baseToAccount;
+  const margin = notional / i.leverage;
+  const pipValueLot = contract * pipSize * q2a;
+  const previewPnl = isNum(i.exit) ? (i.exit - i.entry) * contract * lotsUsed * q2a * (i.side === 'long' ? 1 : -1) : null;
+
+  const warnings = [];
+  if (lotsRounded === 0) warnings.push(`At this stop distance even ${step} lots risks more than your maximum loss.`);
+  if (riskAtUsed > riskAmount * 1.0001) warnings.push('Risk at the size used is above your maximum loss per trade.');
+  if (margin > i.balance) warnings.push('Required margin is larger than the account balance.');
+
+  return {
+    ok: true, kind, pair, pipSize, contract, acct,
+    riskAmount, dist, pips: dist / pipSize,
+    lotsExact, lotsRounded, lotsUsed, custom, step, dp,
+    riskAtUsed, notional, margin, previewPnl,
+    pipValueLot, pipValueUsed: pipValueLot * lotsUsed,
+    warnings,
+  };
+}
+
+/* ---------- crypto position sizing (v2) ----------
+   Assumes the quote currency of the symbol (e.g. the USDT in BTCUSDT) is the
+   account currency, which covers the large majority of crypto trading — no
+   pips, no fixed 100,000-unit contract, sized directly in coins/units. */
+function calcPositionCrypto(i) {
+  const info = m => ({ ok: false, level: 'info', message: m });
+  const bad = m => ({ ok: false, level: 'error', message: m });
+  if (!(i.balance > 0)) return info('Enter an account balance above 0.');
+  if (!(i.riskPct > 0)) return info('Enter the maximum loss per trade as a percentage above 0.');
+  const sym = String(i.pair || '').toUpperCase().trim();
+  if (!sym) return info('Enter a symbol, such as BTCUSDT.');
+  if (!isNum(i.entry) || !isNum(i.stop)) return info('Enter an entry price and a stop loss price.');
+  if (!(i.entry > 0) || !(i.stop > 0)) return bad('Prices must be above 0.');
+  if (i.side === 'long' && !(i.entry > i.stop))
+    return bad('For a long position, entry price has to be higher than stop loss price.');
+  if (i.side === 'short' && !(i.stop > i.entry))
+    return bad('For a short position, entry price has to be lower than stop loss price.');
+  const leverage = i.leverage >= 1 ? i.leverage : 1;
+
+  const riskAmount = i.balance * (i.riskPct / 100);
+  const dist = Math.abs(i.entry - i.stop);
+  const qtyExact = riskAmount / dist;
+  const step = i.lotStep > 0 ? i.lotStep : 0.0001;
+  const dp = decimalsOf(step);
+  const qtyRounded = Number((Math.floor(qtyExact / step + 1e-9) * step).toFixed(dp));
+  const custom = isNum(i.lotsUsed) && i.lotsUsed > 0;
+  const qtyUsed = custom ? i.lotsUsed : qtyRounded;
+
+  const riskAtUsed = qtyUsed * dist;
+  const notional = qtyUsed * i.entry;
+  const margin = notional / leverage;
+  const previewPnl = isNum(i.exit) ? (i.exit - i.entry) * qtyUsed * (i.side === 'long' ? 1 : -1) : null;
+
+  const warnings = [];
+  if (qtyRounded === 0) warnings.push(`At this stop distance even ${step} units risks more than your maximum loss.`);
+  if (riskAtUsed > riskAmount * 1.0001) warnings.push('Risk at the size used is above your maximum loss per trade.');
+  if (margin > i.balance) warnings.push('Required margin is larger than the account balance.');
+
+  return {
+    ok: true, kind: 'crypto', sym, acct: String(i.currency || 'USD').toUpperCase(),
+    riskAmount, dist, leverage,
+    qtyExact, qtyRounded, qtyUsed, custom, step, dp,
+    riskAtUsed, notional, margin, previewPnl,
+    warnings,
+  };
+}
+
+/* ==========================================================================
+   CSV IMPORT / EXPORT (workbook format: Date, Account Size, Side, PnL)
+   ========================================================================== */
+function parseNumLoose(v, decComma) {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  let s = String(v ?? '').trim();
+  if (!s) return null;
+  let neg = false;
+  if (/^\(.*\)$/.test(s)) { neg = true; s = s.slice(1, -1); }
+  s = s.replace(/[\u2212\u2013]/g, '-').replace(/[$€£¥%\s]/g, '');
+  s = decComma ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+  if (!/^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i.test(s)) return null;
+  const n = Number(s);
+  if (!Number.isFinite(n)) return null;
+  return neg ? -n : n;
+}
+
+function parseDateLoose(v) {
+  if (v == null) return null;
+  const s = String(v).trim();
+  if (!s) return null;
+  const fixYear = y => (y < 100 ? (y < 70 ? 2000 + y : 1900 + y) : y);
+  const mk = (y, mo, d) => {
+    const iso = `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    return isIso(iso) ? iso : null;
+  };
+  let m;
+  if ((m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[T\s].*)?$/))) return mk(+m[1], +m[2], +m[3]);
+  if ((m = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/))) return mk(fixYear(+m[3]), +m[2], +m[1]);   // D.M.Y
+  if ((m = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/))) return mk(fixYear(+m[3]), +m[1], +m[2]); // M/D/Y (workbook mm-dd-yy)
+  return null;
+}
+
+function parseCSV(text) {
+  text = String(text).replace(/^\ufeff/, '');
+  const first = text.split(/\r?\n/, 1)[0] || '';
+  const count = c => first.split(c).length - 1;
+  const delim = [[',', count(',')], [';', count(';')], ['\t', count('\t')]].sort((a, b) => b[1] - a[1])[0][0];
+  const rows = [];
+  let row = [], f = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; }
+      else f += c;
+    } else if (c === '"') q = true;
+    else if (c === delim) { row.push(f); f = ''; }
+    else if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(f); f = '';
+      rows.push(row); row = [];
+    } else f += c;
+  }
+  if (f !== '' || row.length) { row.push(f); rows.push(row); }
+  return { rows, delim };
+}
+
+const ALIASES = {
+  date: ['date', 'tradedate', 'closedat', 'closedate', 'exitdate'],
+  accountSize: ['accountsize', 'account', 'equity', 'balance', 'accountbalance'],
+  side: ['side', 'direction'],
+  pnl: ['pnl', 'pl', 'profit', 'profitloss', 'netpnl', 'result'],
+  pair: ['pair', 'symbol', 'instrument'],
+  assetType: ['assettype', 'markettype', 'market', 'type'],
+  timeframe: ['timeframe', 'tf', 'tradedtimeframe'],
+  lots: ['lots', 'lot', 'size', 'volume'],
+  entry: ['entry', 'entryprice', 'openprice'],
+  exit: ['exit', 'exitprice', 'closeprice'],
+  stop: ['stop', 'stoploss', 'sl', 'stopprice'],
+  risk: ['risk', 'riskamount'],
+  screenshotBefore: ['screenshotbefore', 'ssbefore', 'beforescreenshot'],
+  screenshotAfter: ['screenshotafter', 'ssafter', 'afterscreenshot'],
+  tag: ['strategy', 'tag', 'setup', 'tags'],
+  notes: ['notes', 'note', 'comment', 'comments'],
+};
+const parseBoolLoose = v => /^(y|yes|true|1)$/i.test(String(v ?? '').trim());
+const unformula = s => (/^'[=+\-@]/.test(s) ? s.slice(1) : s);
+
+/* Returns { trades, errors, skippedBlank }. Rules follow the workbook spec:
+   whole-day dates, Side must be long/short, PnL must be numeric, ignore % Return. */
+function importRows(rows, delim) {
+  const out = { trades: [], errors: [], skippedBlank: 0 };
+  if (!rows.length) { out.errors.push({ row: 1, msg: 'The file is empty.' }); return out; }
+  const norm = h => String(h).toLowerCase().replace(/[^a-z0-9]/g, '');
+  const head = rows[0].map(norm);
+  const col = {};
+  for (const [k, names] of Object.entries(ALIASES)) col[k] = head.findIndex(h => names.includes(h));
+  for (const req of ['date', 'side', 'pnl']) {
+    if (col[req] < 0) out.errors.push({ row: 1, msg: `Missing required column: ${req === 'pnl' ? 'PnL' : req[0].toUpperCase() + req.slice(1)}.` });
+  }
+  if (out.errors.length) return out;
+  const dc = delim === ';';
+  for (let r = 1; r < rows.length; r++) {
+    const cells = rows[r];
+    if (!cells.some(c => String(c).trim() !== '')) { out.skippedBlank++; continue; }
+    const get = k => (col[k] >= 0 ? cells[col[k]] : '');
+    const rowNo = r + 1;
+    const date = parseDateLoose(get('date'));
+    if (!date) { out.errors.push({ row: rowNo, msg: `Date "${String(get('date')).trim()}" is not a valid day.` }); continue; }
+    const sideRaw = String(get('side')).trim().toLowerCase();
+    if (sideRaw !== 'long' && sideRaw !== 'short') { out.errors.push({ row: rowNo, msg: `Side "${String(get('side')).trim()}" must be Long or Short.` }); continue; }
+    const pnl = parseNumLoose(get('pnl'), dc);
+    if (pnl === null) { out.errors.push({ row: rowNo, msg: `PnL "${String(get('pnl')).trim()}" is not a number.` }); continue; }
+    const opt = k => { const v = parseNumLoose(get(k), dc); return v === null ? null : v; };
+    const acc = opt('accountSize');
+    const assetRaw = String(get('assetType')).trim().toLowerCase();
+    out.trades.push({
+      date, side: sideRaw, pnl,
+      accountSize: acc !== null && acc > 0 ? acc : null,
+      pair: unformula(String(get('pair')).trim()).toUpperCase().replace(/[^A-Z0-9/]/g, ''),
+      assetType: assetRaw === 'crypto' ? 'crypto' : 'forex',
+      timeframe: unformula(String(get('timeframe')).trim()),
+      lots: opt('lots'), entry: opt('entry'), exit: opt('exit'), stop: opt('stop'), risk: opt('risk'),
+      screenshotBefore: parseBoolLoose(get('screenshotBefore')),
+      screenshotAfter: parseBoolLoose(get('screenshotAfter')),
+      tag: unformula(String(get('tag')).trim()),
+      notes: unformula(String(get('notes')).trim()),
+    });
+  }
+  return out;
+}
+
+function buildCSV(list) {
+  const cell = (v, text) => {
+    let s = v == null ? '' : String(v);
+    if (text && /^[=+\-@]/.test(s)) s = "'" + s;
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const head = ['Trade No', 'Date', 'Account Size', 'Side', 'PnL', '% Return', 'Pair', 'Asset Type', 'Time Frame', 'Lots', 'Entry', 'Exit', 'Stop', 'Risk', 'R Multiple', 'Screenshot Before', 'Screenshot After', 'Strategy', 'Notes'];
+  const lines = [head.join(',')];
+  for (const t of list) {
+    lines.push([
+      tradeNoOf(t.seq), t.date, isNum(t.equity) ? +t.equity.toFixed(8) : '', t.side[0].toUpperCase() + t.side.slice(1), t.pnl,
+      isNum(t.ret) ? +t.ret.toFixed(8) : '',
+      cell(t.pair, true), t.assetType === 'crypto' ? 'Crypto' : 'Forex', cell(t.timeframe, true),
+      t.lots ?? '', t.entry ?? '', t.exit ?? '', t.stop ?? '', t.risk ?? '', isNum(t.rMult) ? +t.rMult.toFixed(6) : '',
+      t.screenshotBefore ? 'Yes' : 'No', t.screenshotAfter ? 'Yes' : 'No',
+      cell(t.tag, true), cell(t.notes, true),
+    ].join(','));
+  }
+  return lines.join('\r\n');
+}
+
+/* ---------- heat-map level thresholds (quantiles of |value|) ---------- */
+function heatSteps(values) {
+  const v = values.map(Math.abs).filter(x => x > 0).sort((a, b) => a - b);
+  const q = p => v[Math.floor(p * (v.length - 1))] ?? 0;
+  return [q(0.33), q(0.66)];
+}
+
+/* Account sizes are the workbook's own typed values (spec §8.1) so the demo reproduces the spec's numbers. */
+const SAMPLE_TRADES = [
+  { accountSize: 2000, date: '2024-01-01', side: 'long',  pnl: 30,    pair: 'USDCAD', assetType: 'forex', timeframe: '15min', risk: 20, screenshotBefore: true, screenshotAfter: true, tag: 'Breakout', notes: 'Clean break of the Asian range; held to the first target.' },
+  { accountSize: 2030, date: '2024-01-02', side: 'short', pnl: -20,   pair: 'EURUSD', assetType: 'forex', timeframe: '30min', risk: 20, screenshotBefore: true, screenshotAfter: false, tag: 'Pullback', notes: 'Entered early, stopped out before the retest.' },
+  { accountSize: 2010, date: '2024-01-03', side: 'long',  pnl: 45.5,  pair: 'GBPUSD', assetType: 'forex', timeframe: '1H', risk: 20, screenshotBefore: true, screenshotAfter: true, tag: 'Breakout', notes: '' },
+  { accountSize: 2055.5, date: '2024-01-05', side: 'short', pnl: 12,    pair: 'USDJPY', assetType: 'forex', timeframe: '45min', risk: 20, screenshotBefore: false, screenshotAfter: true, tag: 'Reversal', notes: 'Same day as the GBPUSD long below.' },
+  { accountSize: 2067.5, date: '2024-01-05', side: 'long',  pnl: -40,   pair: 'GBPUSD', assetType: 'forex', timeframe: '15min', risk: 20, screenshotBefore: false, screenshotAfter: false, tag: 'Pullback', notes: 'Ignored the news calendar. Avoid trading into NFP.' },
+  { accountSize: 2027.5, date: '2024-01-08', side: 'long',  pnl: -15,   pair: 'USDCAD', assetType: 'forex', timeframe: '1H', risk: 20, screenshotBefore: true, screenshotAfter: true, tag: 'Breakout', notes: '' },
+  { accountSize: 2012.5, date: '2024-01-09', side: 'short', pnl: 25,    pair: 'EURUSD', assetType: 'forex', timeframe: '30min', risk: 20, screenshotBefore: true, screenshotAfter: true, tag: 'Reversal', notes: 'Scaled out at resistance.' },
+  { accountSize: 2012.5, date: '2024-01-09', side: 'short', pnl: -25,   pair: 'EURUSD', assetType: 'forex', timeframe: '30min', risk: 20, screenshotBefore: true, screenshotAfter: false, tag: 'Reversal', notes: 'Re-entered too soon and gave it all back.' },
+  { accountSize: 2012.5, date: '2024-01-11', side: 'long',  pnl: 0,     pair: 'BTCUSDT', assetType: 'crypto', timeframe: '4H', risk: 20, screenshotBefore: true, screenshotAfter: true, tag: 'Pullback', notes: 'Moved stop to break-even and got tagged.' },
+  { accountSize: 2012.5, date: '2024-01-12', side: 'long',  pnl: 60,    pair: 'ETHUSDT', assetType: 'crypto', timeframe: '4H', risk: 20, screenshotBefore: true, screenshotAfter: true, tag: 'Breakout', notes: 'Best trade of the week: waited for the retest.' },
+];
+
+
+
+/* ==========================================================================
+   APP — state, formatting, persistence, charts
+   ========================================================================== */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const MINUS = '\u2212';
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const KEY = 'fxjournal.v1', THEME_KEY = 'fxjournal.theme';
+
+const DEFAULT_SETTINGS = { startBalance: 2000, currency: 'USD', riskPct: 2, leverage: 50, periods: 252, rf: 0, sharpeMode: 'all' };
+const state = {
+  trades: [], seq: 0,
+  settings: Object.assign({}, DEFAULT_SETTINGS),
+  ui: {
+    tab: 'dash', scope: 'all', from: '', to: '', preset: 'all', curve: 'arith',
+    vis: { long: true, short: true, total: true },
+    tq: '', tasset: '', tpair: '', ttag: '', tout: '', tday: '', sort: { key: 'date', dir: -1 }, page: 1, per: 50,
+    pairMetric: 'pnl', editing: null, calcReady: false,
+  },
+};
+let storageOk = true;
+const D = {}; // derived data, rebuilt by recompute()
+
+/* ---------- formatting ---------- */
+const moneyFmts = {};
+function fmtMoney(v, signed) {
+  if (!isNum(v)) return '—';
+  const cur = state.settings.currency;
+  let s;
+  try {
+    const f = moneyFmts[cur] || (moneyFmts[cur] = new Intl.NumberFormat('en-US', { style: 'currency', currency: cur }));
+    s = f.format(Math.abs(v));
+  } catch (e) { s = cur + ' ' + Math.abs(v).toFixed(2); }
+  const zero = Math.abs(v) < 0.005;
+  if (v < 0 && !zero) return MINUS + s;
+  if (signed && v > 0 && !zero) return '+' + s;
+  return s;
+}
+function fmtPct(v, d = 2, signed = false) {
+  if (!isNum(v)) return '—';
+  const s = (Math.abs(v) * 100).toFixed(d);
+  const zero = +s === 0;
+  if (v < 0 && !zero) return MINUS + s + '%';
+  if (signed && v > 0 && !zero) return '+' + s + '%';
+  return s + '%';
+}
+function fmtNum(v, d = 2) { return isNum(v) ? (v < 0 ? MINUS : '') + Math.abs(v).toFixed(d) : '—'; }
+const fmtPx = v => (isNum(v) ? String(+v.toFixed(5)) : '—');
+const fmtLots = v => (isNum(v) ? String(+v.toFixed(3)) : '—');
+const sgnCls = v => (v > 0 ? 'pos' : v < 0 ? 'neg' : '');
+function dateLabel(iso, withYear) {
+  const [y, m, d] = iso.split('-');
+  const s = MONTHS[+m - 1] + ' ' + (+d);
+  return withYear ? s + " '" + y.slice(2) : s;
+}
+function todayISO() {
+  const d = new Date(), p = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+}
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+/* ---------- persistence ---------- */
+const numOrNull = v => (isNum(v) ? v : null);
+function normTrade(t) {
+  return {
+    id: t.id || uid(), seq: isNum(t.seq) ? t.seq : 0, date: t.date, side: t.side, pnl: t.pnl,
+    accountSize: isNum(t.accountSize) && t.accountSize > 0 ? t.accountSize : null,
+    pair: String(t.pair || '').toUpperCase().replace(/[^A-Z0-9/]/g, ''),
+    assetType: t.assetType === 'crypto' ? 'crypto' : 'forex',
+    timeframe: String(t.timeframe || '').trim().slice(0, 20),
+    lots: numOrNull(t.lots), entry: numOrNull(t.entry), exit: numOrNull(t.exit), stop: numOrNull(t.stop), risk: numOrNull(t.risk),
+    screenshotBefore: !!t.screenshotBefore, screenshotAfter: !!t.screenshotAfter,
+    tag: String(t.tag || '').trim(), notes: String(t.notes || '').trim(),
+  };
+}
+const validTrade = t => t && isIso(t.date) && (t.side === 'long' || t.side === 'short') && isNum(t.pnl);
+function cleanSettings(o) {
+  const d = DEFAULT_SETTINGS, out = {};
+  out.startBalance = isNum(o.startBalance) && o.startBalance > 0 ? o.startBalance : d.startBalance;
+  out.currency = /^[A-Za-z]{3}$/.test(o.currency || '') ? o.currency.toUpperCase() : d.currency;
+  out.riskPct = isNum(o.riskPct) && o.riskPct > 0 ? o.riskPct : d.riskPct;
+  out.leverage = isNum(o.leverage) && o.leverage >= 1 ? o.leverage : d.leverage;
+  out.periods = [252, 260, 365].includes(o.periods) ? o.periods : d.periods;
+  out.rf = isNum(o.rf) && o.rf >= 0 ? o.rf : 0;
+  out.sharpeMode = o.sharpeMode === 'active' ? 'active' : 'all';
+  return out;
+}
+function load() {
+  loadTheme();
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); } catch (e) { storageOk = false; }
+  if (raw) {
+    try {
+      const o = JSON.parse(raw);
+      if (Array.isArray(o.trades)) state.trades = o.trades.filter(validTrade).map(normTrade);
+      state.seq = Math.max(0, +o.seq || 0, ...state.trades.map(t => t.seq));
+      if (o.settings) state.settings = cleanSettings(o.settings);
+    } catch (e) { /* corrupted entry: start clean */ }
+  }
+}
+function loadTheme() {
+  try { if (localStorage.getItem(THEME_KEY) === 'light') document.body.classList.add('light'); } catch (e) { /* ignore */ }
+}
+function save() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify({ trades: state.trades, seq: state.seq, settings: state.settings }));
+    storageOk = true;
+  } catch (e) { storageOk = false; }
+  scheduleCloudSync();
+}
+
+/* ---------- cloud sync (Supabase) ----------
+   Fill in your own project's URL and anon key below to turn on multi-user
+   login and cross-device sync. Leave them as-is to keep the original
+   single-browser, offline-only journal — everything above still works
+   exactly the same either way.
+
+   SETUP (free, no credit card):
+   1. Create a project at https://supabase.com
+   2. In the SQL Editor, run:
+
+      create table public.trades (
+        id text primary key, user_id uuid not null references auth.users(id) on delete cascade,
+        seq integer, date date not null, side text not null, pnl numeric not null,
+        account_size numeric, pair text, asset_type text default 'forex', timeframe text,
+        lots numeric, entry numeric, exit numeric, stop numeric, risk numeric,
+        screenshot_before boolean default false, screenshot_after boolean default false,
+        tag text, notes text
+      );
+      alter table public.trades enable row level security;
+      create policy "own trades" on public.trades for all
+        using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+      create table public.settings (
+        user_id uuid primary key references auth.users(id) on delete cascade,
+        data jsonb not null default '{}'::jsonb, updated_at timestamptz default now()
+      );
+      alter table public.settings enable row level security;
+      create policy "own settings" on public.settings for all
+        using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+   3. In Project Settings ? API, copy the Project URL and the "anon public" key
+      into SUPABASE_URL and SUPABASE_ANON_KEY below.
+   4. In Authentication ? Providers, Email should already be on. Optionally turn
+      off "Confirm email" in Authentication ? Settings for instant sign-up.
+   5. Push this file to a GitHub repo and turn on GitHub Pages (Settings ? Pages)
+      to get a free https://yourname.github.io/reponame address. */
+const SUPABASE_URL = '
+https://uixmayxboblugpldyzza.supabase.co/rest/v1/';
+const SUPABASE_ANON_KEY = 'sb_publishable_vD7lRUsmakl8w1wxS8sw7A_6zsptCUl';
+const CLOUD_ENABLED = /^https:\/\/.+\.supabase\.co\/?$/.test(SUPABASE_URL) && SUPABASE_ANON_KEY.length > 20;
+const sb = CLOUD_ENABLED && window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+let cloudUser = null;
+let syncChain = Promise.resolve();
+let syncTimer = null;
+
+function tradeToRow(t, uid) {
+  return {
+    id: t.id, user_id: uid, seq: t.seq, date: t.date, side: t.side, pnl: t.pnl,
+    account_size: t.accountSize, pair: t.pair, asset_type: t.assetType, timeframe: t.timeframe,
+    lots: t.lots, entry: t.entry, exit: t.exit, stop: t.stop, risk: t.risk,
+    screenshot_before: t.screenshotBefore, screenshot_after: t.screenshotAfter,
+    tag: t.tag, notes: t.notes,
+  };
+}
+function rowToTrade(r) {
+  return normTrade({
+    id: r.id, seq: r.seq, date: r.date, side: r.side, pnl: r.pnl, accountSize: r.account_size,
+    pair: r.pair, assetType: r.asset_type, timeframe: r.timeframe, lots: r.lots, entry: r.entry,
+    exit: r.exit, stop: r.stop, risk: r.risk, screenshotBefore: r.screenshot_before, screenshotAfter: r.screenshot_after,
+    tag: r.tag, notes: r.notes,
+  });
+}
+function setCloudStatus(status, extra) {
+  if (!CLOUD_ENABLED) return;
+  const dot = $('#pingSave'), txt = $('#pingSaveTxt');
+  if (status === 'loading') { dot.className = 'dot'; txt.textContent = 'Loading your trades…'; }
+  else if (status === 'saving') { dot.className = 'dot'; txt.textContent = 'Saving to cloud…'; }
+  else if (status === 'saved') { dot.className = 'dot ok'; txt.textContent = cloudUser ? `Synced · ${cloudUser.email}` : 'Synced'; }
+  else if (status === 'error') { dot.className = 'dot'; txt.textContent = extra || 'Cloud sync failed — will retry'; }
+  else if (status === 'signedout') { dot.className = 'dot'; txt.textContent = 'Signed out'; }
+}
+function scheduleCloudSync() {
+  if (!CLOUD_ENABLED || !cloudUser) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    syncChain = syncChain.then(cloudSyncNow).catch(e => { console.error('Cloud sync failed', e); setCloudStatus('error'); });
+  }, 700);
+}
+async function cloudSyncNow() {
+  if (!CLOUD_ENABLED || !cloudUser) return;
+  const uid = cloudUser.id;
+  setCloudStatus('saving');
+  const rows = state.trades.map(t => tradeToRow(t, uid));
+  if (rows.length) {
+    const ins = await sb.from('trades').upsert(rows, { onConflict: 'id' });
+    if (ins.error) throw ins.error;
+  }
+  const existing = await sb.from('trades').select('id').eq('user_id', uid);
+  if (existing.error) throw existing.error;
+  const keep = new Set(state.trades.map(t => t.id));
+  const toDelete = (existing.data || []).map(r => r.id).filter(id => !keep.has(id));
+  if (toDelete.length) {
+    const del = await sb.from('trades').delete().in('id', toDelete);
+    if (del.error) throw del.error;
+  }
+  const s = await sb.from('settings').upsert({ user_id: uid, data: state.settings, updated_at: new Date().toISOString() });
+  if (s.error) throw s.error;
+  setCloudStatus('saved');
+}
+async function bootstrapCloud() {
+  const uid = cloudUser.id;
+  const [tr, sr] = await Promise.all([
+    sb.from('trades').select('*').eq('user_id', uid),
+    sb.from('settings').select('data').eq('user_id', uid).maybeSingle(),
+  ]);
+  if (tr.error) throw tr.error;
+  if (sr.error) throw sr.error;
+  state.trades = (tr.data || []).map(rowToTrade);
+  state.seq = Math.max(0, 0, ...state.trades.map(t => t.seq));
+  state.settings = cleanSettings(Object.assign({}, DEFAULT_SETTINGS, (sr.data && sr.data.data) || {}));
+}
+function resetLocalState() {
+  state.trades = []; state.seq = 0; state.settings = Object.assign({}, DEFAULT_SETTINGS);
+  state.ui.editing = null; state.ui.page = 1;
+}
+function showGate(mode) {
+  $('#gate').classList.remove('hidden');
+  if (mode === 'loading') {
+    $('#f-gate').classList.add('hidden'); $('#gate-tabs').classList.add('hidden'); $('#gate-loading').classList.remove('hidden');
+  } else {
+    $('#f-gate').classList.remove('hidden'); $('#gate-tabs').classList.remove('hidden'); $('#gate-loading').classList.add('hidden');
+    $('#gate-err').hidden = true; $('#gate-msg').hidden = true;
+  }
+}
+function hideGate() { $('#gate').classList.add('hidden'); }
+function setGateTab(tab) {
+  $$('[data-gate-tab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.gateTab === tab)));
+  $('#gate-submit').textContent = tab === 'signup' ? 'Create account' : 'Sign in';
+  $('#gate-sub').textContent = tab === 'signup' ? 'Create a password-protected account — your trades stay private to you.' : 'Sign in to sync your trades to the cloud.';
+  $('#f-gate').dataset.mode = tab;
+  $('#gate-err').hidden = true; $('#gate-msg').hidden = true;
+}
+async function onSignedIn(user) {
+  cloudUser = user;
+  hideGate();
+  $('#btn-signout').hidden = false;
+  setCloudStatus('loading');
+  try { await bootstrapCloud(); setCloudStatus('saved'); }
+  catch (e) { console.error(e); setCloudStatus('error', 'Could not load cloud data'); toast('Could not load your cloud trades. Check your connection and reload.'); }
+  renderAll();
+}
+function onSignedOut() {
+  cloudUser = null;
+  resetLocalState();
+  $('#btn-signout').hidden = true;
+  setCloudStatus('signedout');
+  renderAll();
+  showGate('form');
+}
+async function initAuth() {
+  showGate('loading');
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session && session.user) await onSignedIn(session.user);
+    else showGate('form');
+  } catch (e) { console.error(e); showGate('form'); }
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session && (!cloudUser || cloudUser.id !== session.user.id)) onSignedIn(session.user);
+    else if (event === 'SIGNED_OUT') onSignedOut();
+  });
+}
+
+
+/* ---------- derived data ---------- */
+const inScope = t => state.ui.scope === 'all' || t.side === state.ui.scope;
+const inRange = t => (!state.ui.from || t.date >= state.ui.from) && (!state.ui.to || t.date <= state.ui.to);
+function recompute() {
+  const s = state.settings;
+  D.all = enrich(state.trades, s.startBalance);
+  D.balance = s.startBalance + sum(D.all.map(t => (isNum(t.pnl) ? t.pnl : 0)));
+  D.anchor = D.all.length ? D.all[D.all.length - 1].date : todayISO();
+  D.range = D.all.filter(inRange);
+  D.view = D.range.filter(inScope);
+  D.ds = dailySeries(D.range);
+  D.stats = stats(D.view);
+  const before = state.ui.from ? D.all.filter(t => inScope(t) && t.date < state.ui.from) : [];
+  D.dd = drawdown(D.view, s.startBalance + sum(before.map(t => t.pnl)));
+}
+function sharpeFor(series) {
+  const s = state.settings;
+  return sharpe(series, s.periods, s.rf / 100, s.sharpeMode === 'active');
+}
+
+/* ---------- tooltip + toast ---------- */
+function showTip(html, x, y, asText) {
+  const tip = $('#tip');
+  if (asText) tip.textContent = html; else tip.innerHTML = html;
+  tip.hidden = false;
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  let left = x + 14, top = y + 14;
+  if (left + w > innerWidth - 8) left = x - w - 14;
+  if (top + h > innerHeight - 8) top = y - h - 14;
+  tip.style.left = Math.max(8, left) + 'px';
+  tip.style.top = Math.max(8, top) + 'px';
+}
+const hideTip = () => { $('#tip').hidden = true; };
+let toastTimer;
+function toast(msg) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+/* ==========================================================================
+   CHARTS — hand-built SVG, no libraries
+   ========================================================================== */
+function niceTicks(lo, hi, n = 5) {
+  if (!(hi > lo)) { const d = Math.abs(hi) || 1; lo -= d * 0.1; hi += d * 0.1; }
+  const raw = (hi - lo) / n, mag = Math.pow(10, Math.floor(Math.log10(raw))), norm = raw / mag;
+  const step = (norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10) * mag;
+  const start = Math.floor(lo / step + 1e-9) * step, end = Math.ceil(hi / step - 1e-9) * step;
+  const ticks = [];
+  for (let v = start; v <= end + step * 1e-6; v += step) ticks.push(Math.abs(v) < step * 1e-9 ? 0 : +v.toFixed(12));
+  return ticks;
+}
+function decFor(x) { for (let d = 0; d <= 4; d++) { const y = x * 10 ** d; if (Math.abs(y - Math.round(y)) < 1e-6) return d; } return 2; }
+const pctTick = (v, step) => fmtPct(v, decFor(step * 100));
+function xTickIdx(n, pw) {
+  if (n <= 1) return [0];
+  const k = Math.max(2, Math.min(n, Math.floor(pw / 92)));
+  const set = new Set();
+  for (let j = 0; j < k; j++) set.add(Math.round(j * (n - 1) / (k - 1)));
+  return [...set];
+}
+function frame(host, cfg, domainVals) {
+  const n = cfg.rows.length;
+  const W = Math.max(320, Math.round(host.clientWidth) || 640), H = cfg.height || 260;
+  const m = { l: 58, r: 14, t: 10, b: 26 };
+  const pw = W - m.l - m.r, ph = H - m.t - m.b;
+  let lo = 0, hi = 0;
+  for (const v of domainVals) { if (v < lo) lo = v; if (v > hi) hi = v; }
+  const ticks = niceTicks(lo, hi, 5), step = ticks.length > 1 ? ticks[1] - ticks[0] : 1;
+  const y0 = ticks[0], y1 = ticks[ticks.length - 1];
+  const Y = v => m.t + (1 - (v - y0) / (y1 - y0)) * ph;
+  return { n, W, H, m, pw, ph, ticks, step, Y };
+}
+function axes(f, cfg, X) {
+  let s = '';
+  for (const t of f.ticks) {
+    const y = f.Y(t);
+    s += `<line class="gl${t === 0 ? ' zero' : ''}" x1="${f.m.l}" x2="${f.W - f.m.r}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}"/>` +
+      `<text class="ax" x="${f.m.l - 8}" y="${(y + 3.5).toFixed(1)}" text-anchor="end">${esc(cfg.fmtY(t, f.step))}</text>`;
+  }
+  const xi = xTickIdx(f.n, f.pw), withYear = f.n > 300;
+  xi.forEach((i, k) => {
+    const anchor = xi.length > 1 && k === 0 ? 'start' : xi.length > 1 && k === xi.length - 1 ? 'end' : 'middle';
+    s += `<text class="ax" x="${X(i).toFixed(1)}" y="${f.H - 6}" text-anchor="${anchor}">${dateLabel(cfg.rows[i].date, withYear)}</text>`;
+  });
+  return s;
+}
+function tipHTML(date, items) {
+  return `<b>${esc(date)}</b>` + items.map(it => `<i style="--c:${it.color}"></i>${esc(it.label)}  ${esc(it.text)}`).join('\n');
+}
+
+/* line / area chart over the daily date spine */
+function lineChart(host, cfg) {
+  const rows = cfg.rows;
+  if (!rows.length) { host.innerHTML = ''; return; }
+  const act = cfg.series.filter(s => s.visible !== false);
+  const vals = [];
+  for (const s of act) for (const r of rows) { const v = s.get(r); if (isNum(v)) vals.push(v); }
+  const f = frame(host, cfg, vals), { n, W, H, m, pw, ph, Y } = f;
+  const X = i => m.l + (n === 1 ? pw / 2 : i / (n - 1) * pw);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(cfg.label)}">` + axes(f, cfg, X);
+  for (const sr of act) {
+    let d = '', pen = false;
+    rows.forEach((r, i) => {
+      const v = sr.get(r);
+      if (!isNum(v)) { pen = false; return; }
+      d += (pen ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1); pen = true;
+    });
+    if (sr.area) s += `<path d="${d} L${X(n - 1).toFixed(1)} ${Y(0).toFixed(1)} L${X(0).toFixed(1)} ${Y(0).toFixed(1)} Z" style="fill:${sr.color};fill-opacity:.16"/>`;
+    s += `<path d="${d}" fill="none" style="stroke:${sr.color}" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/>`;
+    const lv = sr.get(rows[n - 1]);
+    if (isNum(lv)) s += `<circle cx="${X(n - 1).toFixed(1)}" cy="${Y(lv).toFixed(1)}" r="3" style="fill:${sr.color}"/>`;
+  }
+  s += `<line class="xh" y1="${m.t}" y2="${m.t + ph}" style="display:none"/>`;
+  for (const sr of act) s += `<circle class="hd" r="4" style="fill:${sr.color};stroke:var(--surface);stroke-width:2;display:none"/>`;
+  s += `<rect class="ov" x="${m.l}" y="${m.t}" width="${pw}" height="${ph}" fill="transparent" style="touch-action:pan-y"/></svg>`;
+  host.innerHTML = s;
+  const svg = host.firstChild, xh = $('.xh', svg), dots = $$('.hd', svg), ov = $('.ov', svg);
+  ov.addEventListener('pointermove', ev => {
+    const rc = svg.getBoundingClientRect(), px = (ev.clientX - rc.left) * (W / rc.width);
+    const i = Math.max(0, Math.min(n - 1, n === 1 ? 0 : Math.round((px - m.l) / pw * (n - 1))));
+    xh.setAttribute('x1', X(i)); xh.setAttribute('x2', X(i)); xh.style.display = '';
+    dots.forEach((d, k) => {
+      const v = act[k].get(rows[i]);
+      if (isNum(v)) { d.setAttribute('cx', X(i)); d.setAttribute('cy', Y(v)); d.style.display = ''; } else d.style.display = 'none';
+    });
+    showTip(cfg.tip(rows[i], act), ev.clientX, ev.clientY);
+  });
+  ov.addEventListener('pointerleave', () => { xh.style.display = 'none'; dots.forEach(d => (d.style.display = 'none')); hideTip(); });
+}
+
+/* clustered column chart (blank days draw no bar) */
+function barChart(host, cfg) {
+  const rows = cfg.rows;
+  if (!rows.length) { host.innerHTML = ''; return; }
+  const act = cfg.series.filter(s => s.visible !== false);
+  const vals = [];
+  for (const s of act) for (const r of rows) { const v = s.get(r); if (isNum(v)) vals.push(v); }
+  const f = frame(host, cfg, vals), { n, W, H, m, pw, ph, Y } = f;
+  const gw = pw / n, X = i => m.l + (i + 0.5) * gw;
+  const k = Math.max(1, act.length), bw = Math.max(1, Math.min(18, gw * 0.78 / k));
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(cfg.label)}">` +
+    `<rect class="hl" y="${m.t}" height="${ph}" width="${gw.toFixed(1)}" style="fill:var(--surface3);opacity:.6;display:none"/>` + axes(f, cfg, X);
+  const zero = Y(0);
+  rows.forEach((r, i) => {
+    act.forEach((sr, j) => {
+      const v = sr.get(r);
+      if (!isNum(v)) return;
+      const x = X(i) - bw * k / 2 + j * bw, y = Y(v);
+      s += `<rect x="${x.toFixed(1)}" y="${Math.min(y, zero).toFixed(1)}" width="${Math.max(1, bw - (bw > 4 ? 1 : 0)).toFixed(1)}" height="${Math.max(1, Math.abs(zero - y)).toFixed(1)}" rx="1" style="fill:${sr.color}"/>`;
+    });
+  });
+  s += `<rect class="ov" x="${m.l}" y="${m.t}" width="${pw}" height="${ph}" fill="transparent" style="touch-action:pan-y"/></svg>`;
+  host.innerHTML = s;
+  const svg = host.firstChild, hl = $('.hl', svg), ov = $('.ov', svg);
+  ov.addEventListener('pointermove', ev => {
+    const rc = svg.getBoundingClientRect(), px = (ev.clientX - rc.left) * (W / rc.width);
+    const i = Math.max(0, Math.min(n - 1, Math.floor((px - m.l) / gw)));
+    hl.setAttribute('x', m.l + i * gw); hl.style.display = '';
+    showTip(cfg.tip(rows[i], act), ev.clientX, ev.clientY);
+  });
+  ov.addEventListener('pointerleave', () => { hl.style.display = 'none'; hideTip(); });
+}
+
+function donut(items, main, sub) {
+  const R = 52, C = 2 * Math.PI * R, tot = sum(items.map(i => i.v));
+  const live = items.filter(i => i.v > 0).length;
+  let off = 0;
+  let s = `<svg viewBox="0 0 132 132" width="132" height="132" role="img" aria-label="${esc(items.map(i => i.label + ' ' + i.v).join(', '))}">` +
+    `<circle cx="66" cy="66" r="${R}" fill="none" stroke="var(--surface3)" stroke-width="16"/>`;
+  for (const it of items) {
+    if (!it.v) continue;
+    const len = it.v / tot * C, seg = Math.max(0, len - (live > 1 ? 2 : 0));
+    s += `<circle cx="66" cy="66" r="${R}" fill="none" style="stroke:${it.color}" stroke-width="16" stroke-dasharray="${seg.toFixed(2)} ${(C - seg).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 66 66)"/>`;
+    off += len;
+  }
+  s += `<text x="66" y="68" text-anchor="middle" style="font:700 19px var(--mono);fill:var(--text)">${esc(main)}</text>` +
+    `<text x="66" y="84" text-anchor="middle" style="font:700 9px var(--mono);fill:var(--text-faint);letter-spacing:.12em">${esc(sub)}</text></svg>`;
+  return s;
+}
+
+/* legend with toggle buttons; updates aria-pressed in place, then redraws the chart */
+function legend(host, defs, onChange) {
+  host.innerHTML = defs.map(d => `<button class="lg-item" data-k="${d.key}" style="--c:${d.color}" aria-pressed="${state.ui.vis[d.key]}"><i></i>${esc(d.label)}</button>`).join('');
+  host.onclick = e => {
+    const b = e.target.closest('.lg-item');
+    if (!b) return;
+    const k = b.dataset.k;
+    state.ui.vis[k] = !state.ui.vis[k];
+    b.setAttribute('aria-pressed', state.ui.vis[k]);
+    onChange();
+  };
+}
+const SERIES = [
+  { key: 'long', label: 'Long', color: 'var(--c-long)' },
+  { key: 'short', label: 'Short', color: 'var(--c-short)' },
+  { key: 'total', label: 'Total', color: 'var(--c-total)' },
+];
+
+
+/* ==========================================================================
+   VIEWS
+   ========================================================================== */
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+const kpi = (label, val, sub, strip, cls = '', title = '') =>
+  `<div class="stat-card" style="--strip:var(--${strip})"${title ? ` title="${esc(title)}"` : ''}><div class="stat-label">${esc(label)}</div><div class="stat-val ${cls}">${val}</div><div class="stat-sub">${sub}</div></div>`;
+
+function emptyJournal() {
+  return `<div class="card"><div class="empty"><h2>Your journal is empty</h2>
+    <p>Log your first trade to see returns, drawdown and win rate here. Or load ten sample trades to look around first.</p>
+    <div class="row"><button class="btn btn-blue" data-action="add">+ Add trade</button><button class="btn" data-action="sample">Load sample</button><button class="btn" data-action="import">? Import CSV</button></div></div></div>`;
+}
+function emptyView() {
+  return `<div class="card"><div class="empty"><h2>No trades in this view</h2><p>Nothing matches the current scope and date range.</p>
+    <button class="btn btn-blue" data-action="reset-filters">Show all trades</button></div></div>`;
+}
+function keepScroll(el, fn) { const st = el.scrollTop; fn(); el.scrollTop = st; }
+
+/* ---------- Dashboard ---------- */
+function renderDash() {
+  const el = $('#v-dash');
+  if (!D.all.length) { el.innerHTML = emptyJournal(); return; }
+  if (!D.view.length) { el.innerHTML = emptyView(); return; }
+  keepScroll(el, () => {
+    const S = D.stats, dd = D.dd, st = state.settings;
+    const shKey = { all: 'total', long: 'longs', short: 'shorts' }[state.ui.scope];
+    const sh = sharpeFor(D.ds.map(r => r[shKey]));
+    const cards = [
+      kpi('Total P&L', fmtMoney(S.totalPnl, true), `${S.n} trade${S.n === 1 ? '' : 's'}`, 'accent', sgnCls(S.totalPnl)),
+      kpi('Total return', fmtPct(S.totalReturn, 2, true), `Compounded ${fmtPct(S.compounded, 2, true)}`, 'green', sgnCls(S.totalReturn), 'Sum of each trade’s P&L ÷ account size'),
+      kpi('Win rate', fmtPct(S.winRate, 1), `${S.wins}W · ${S.losses}L · ${S.be}BE`, 'amber', '', 'Winning trades ÷ all trades'),
+      kpi('Payoff ratio', fmtNum(S.payoff), S.payoff === null ? 'Needs a win and a loss' : `Avg win ${fmtPct(S.avgWin)} / loss ${fmtPct(Math.abs(S.avgLoss))}`, 'purple', '', 'Average winning return ÷ average losing return'),
+      kpi('Profit factor', fmtNum(S.profitFactor), S.profitFactor === null ? 'No losing trades yet' : `${fmtMoney(S.grossProfit)} won / ${fmtMoney(S.grossLoss)} lost`, 'cyan', '', 'Gross profit ÷ gross loss'),
+      kpi('Expectancy', fmtMoney(S.expectancy, true), 'average per trade', 'amber', sgnCls(S.expectancy)),
+      kpi('Max drawdown', dd.maxDd < 0 ? fmtPct(dd.maxDd) : '0.00%', dd.maxDd < 0 ? `${fmtMoney(dd.peak)} ? ${fmtMoney(dd.trough)}` : 'No drawdown', 'red', dd.maxDd < 0 ? 'neg' : '', 'Biggest fall from a balance peak'),
+      kpi('Sharpe ratio', fmtNum(sh.sharpe), `${st.periods}/yr · ${st.sharpeMode === 'active' ? 'active days' : 'all days'}`, 'accent', '', sh.sharpe === null ? 'Needs at least 2 days with varying returns' : 'Average daily return ÷ standard deviation, annualised'),
+    ];
+    const curve = state.ui.curve;
+    const latest = D.view.slice().reverse().slice(0, 6);
+    el.innerHTML = `
+      <div class="grid kpis">${cards.join('')}</div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="card-title">P&amp;L calendar</div>
+        <div class="card-sub">Net P&amp;L per day, rounded. Select a day to open its trades.</div>
+        <div class="heat-wrap" id="heat"></div>
+        <div class="heat-legend">Loss <span class="hc l3"></span><span class="hc l2"></span><span class="hc l1"></span><span class="hc z"></span><span class="hc p1"></span><span class="hc p2"></span><span class="hc p3"></span> Profit</div>
+      </div>
+      <div class="grid g2">
+        <div class="card"><div class="card-title">Outcomes</div>
+          <div class="donut-wrap">${donut([
+            { label: 'Wins', v: S.wins, color: 'var(--pos)' }, { label: 'Losses', v: S.losses, color: 'var(--neg)' }, { label: 'Break-even', v: S.be, color: 'var(--c-short)' }],
+            fmtPct(S.winRate, 0), 'WIN RATE')}
+            <div class="donut-legend">
+              <div><i style="--c:var(--pos)"></i>Wins<span>${S.wins}</span></div>
+              <div><i style="--c:var(--neg)"></i>Losses<span>${S.losses}</span></div>
+              <div><i style="--c:var(--c-short)"></i>Break-even<span>${S.be}</span></div>
+            </div></div></div>
+        <div class="card"><div class="card-title">Long vs short</div>${compareTable()}</div>
+      </div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="card-title"><span>Cumulative return</span>
+          <span class="ctl"><span class="seg inline" role="group" aria-label="Curve type">
+            <button data-action="curve" data-v="arith" aria-pressed="${curve === 'arith'}">Sum</button>
+            <button data-action="curve" data-v="comp" aria-pressed="${curve === 'comp'}">Compounded</button></span></span></div>
+        <div class="chart" id="ch-eq"></div><div class="legend" id="lg-eq"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>Latest trades</span><span class="ctl"><button class="btn btn-sm" data-action="goto-trades">Open trades</button></span></div>
+        <div style="overflow-x:auto"><table class="tbl compact"><thead><tr>
+          <th><span class="th">Date</span></th><th><span class="th">Pair</span></th><th><span class="th">Side</span></th>
+          <th class="r"><span class="th">P&amp;L</span></th><th class="r"><span class="th">Return</span></th></tr></thead><tbody>
+          ${latest.map(t => `<tr><td>${t.date}</td><td class="pair">${esc(t.pair) || '<span class="faint">—</span>'}</td>
+            <td><span class="badge ${t.side === 'long' ? 'b-long' : 'b-short'}">${t.side === 'long' ? 'LONG' : 'SHORT'}</span></td>
+            <td class="r ${sgnCls(t.pnl)}"><b>${fmtMoney(t.pnl, true)}</b></td><td class="r ${sgnCls(t.ret)}">${fmtPct(t.ret, 2, true)}</td></tr>`).join('')}
+        </tbody></table></div>
+      </div>`;
+    legend($('#lg-eq'), SERIES, drawEquity);
+    drawEquity();
+    drawHeat();
+  });
+}
+function drawEquity() {
+  const host = $('#ch-eq');
+  if (!host) return;
+  const comp = state.ui.curve === 'comp';
+  const acc = {
+    long: r => (comp ? r.cpLongs : r.cumLongs),
+    short: r => (comp ? r.cpShorts : r.cumShorts),
+    total: r => (comp ? r.cpTotal : r.cumTotal),
+  };
+  const series = SERIES.map(s => Object.assign({}, s, { visible: state.ui.vis[s.key], get: acc[s.key] }));
+  lineChart(host, {
+    rows: D.ds, series, height: 290, fmtY: pctTick, label: 'Cumulative return by day for long, short and total trades',
+    tip: (r, act) => tipHTML(r.date, act.map(s => ({ color: s.color, label: s.label, text: fmtPct(s.get(r), 2, true) }))),
+  });
+}
+function drawHeat() {
+  const host = $('#heat');
+  if (!host) return;
+  const map = dayPnl(D.view);
+  const end = D.view[D.view.length - 1].date, weeks = 53;
+  const lastSun = addDays(end, -dow(end)), start = addDays(lastSun, -(weeks - 1) * 7);
+  const steps = heatSteps([...map.values()].map(o => o.pnl));
+  let cells = '';
+  for (let i = 0; i < weeks * 7; i++) {
+    const d = addDays(start, i);
+    if (d > end) { cells += '<span class="hc none"></span>'; continue; }
+    const o = map.get(d);
+    if (!o) { cells += `<span class="hc" data-tip="${d}\nNo trades"></span>`; continue; }
+    let cls = 'hc';
+    if (o.pnl === 0) cls += ' z';
+    else { const a = Math.abs(o.pnl); cls += (o.pnl > 0 ? ' p' : ' l') + (a <= steps[0] ? 1 : a <= steps[1] ? 2 : 3); }
+    const rounded = Math.round(o.pnl);
+    const label = rounded === 0 ? '0' : (rounded > 0 ? '+' : MINUS) + Math.abs(rounded);
+    const tip = `${d}\n${o.n} trade${o.n > 1 ? 's' : ''} · ${fmtMoney(o.pnl, true)} (${fmtPct(o.ret, 2, true)})`;
+    cells += `<button class="${cls}" data-action="day" data-date="${d}" data-tip="${esc(tip)}" aria-label="${esc(tip.replace('\n', ': '))}">${esc(label)}</button>`;
+  }
+  let months = '', lastCol = -9;
+  for (let c = 0; c < weeks; c++) {
+    for (let k = 0; k < 7; k++) {
+      const d = addDays(start, c * 7 + k);
+      if (d.slice(8) === '01' && c - lastCol >= 3) { months += `<span style="left:${c * 36}px">${MONTHS[+d.slice(5, 7) - 1]}</span>`; lastCol = c; }
+    }
+  }
+  host.innerHTML = `<div class="heat"><div class="heat-months" aria-hidden="true">${months}</div><div class="heat-body">
+    <div class="heat-days" aria-hidden="true"><span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span></div>
+    <div class="heat-grid">${cells}</div></div></div>`;
+  host.scrollLeft = host.scrollWidth;
+}
+function compareTable() {
+  const A = stats(D.range), L = stats(D.range.filter(t => t.side === 'long')), Sh = stats(D.range.filter(t => t.side === 'short'));
+  const rows = [
+    ['Total P&L', s => fmtMoney(s.totalPnl, true), s => sgnCls(s.totalPnl)],
+    ['Total return', s => fmtPct(s.totalReturn, 2, true), s => sgnCls(s.totalReturn)],
+    ['Avg return / trade', s => fmtPct(s.avgReturn, 2, true), s => sgnCls(s.avgReturn)],
+    ['Trades', s => String(s.n), () => ''],
+    ['Win rate', s => fmtPct(s.winRate, 1), () => ''],
+    ['Payoff ratio', s => fmtNum(s.payoff), () => ''],
+    ['Profit factor', s => fmtNum(s.profitFactor), () => ''],
+    ['Expectancy', s => fmtMoney(s.expectancy, true), s => sgnCls(s.expectancy)],
+  ];
+  return `<div style="overflow-x:auto"><table class="tbl compact"><thead><tr><th><span class="th">Metric</span></th>
+    <th class="r"><span class="th">All</span></th><th class="r"><span class="th">Long</span></th><th class="r"><span class="th">Short</span></th></tr></thead><tbody>` +
+    rows.map(([l, f, c]) => `<tr><td class="dim">${l}</td>${[A, L, Sh].map(s => `<td class="r ${c(s)}">${f(s)}</td>`).join('')}</tr>`).join('') +
+    `</tbody></table></div>`;
+}
+
+/* ---------- Analytics ---------- */
+function renderAnalytics() {
+  const el = $('#v-analytics');
+  if (!D.all.length) { el.innerHTML = emptyJournal(); return; }
+  if (!D.view.length) { el.innerHTML = emptyView(); return; }
+  keepScroll(el, () => {
+    const st = state.settings, dd = D.dd;
+    const shRows = [['Long', 'longs'], ['Short', 'shorts'], ['Total', 'total']].map(([label, k]) => {
+      const r = sharpeFor(D.ds.map(x => x[k]));
+      return `<tr><td>${label}</td><td class="r">${r.n}</td><td class="r ${sgnCls(r.mean)}">${fmtPct(r.mean, 3, true)}</td><td class="r">${fmtPct(r.std, 3)}</td><td class="r"><b>${fmtNum(r.sharpe)}</b></td></tr>`;
+    }).join('');
+    const ddNote = dd.maxDd < 0
+      ? `Deepest fall ${fmtPct(dd.maxDd)}, from ${fmtMoney(dd.peak)} down to ${fmtMoney(dd.trough)}.`
+      : 'The balance never fell below a previous high in this view.';
+    el.innerHTML = `
+      <div class="card" style="margin-bottom:10px">
+        <div class="card-title">Daily returns</div>
+        <div class="card-sub">Sum of trade returns per day. Days without trades show no bar.</div>
+        <div class="chart" id="ch-daily"></div><div class="legend" id="lg-daily"></div>
+      </div>
+      <div class="grid g2">
+        <div class="card"><div class="card-title">Drawdown</div><div class="card-sub">${ddNote}</div>
+          ${dd.maxDd < 0 ? '<div class="chart" id="ch-dd"></div>' : ''}</div>
+        <div class="card"><div class="card-title">Sharpe ratio</div>
+          <div style="overflow-x:auto"><table class="tbl compact"><thead><tr><th><span class="th">Series</span></th><th class="r"><span class="th">Days</span></th>
+            <th class="r"><span class="th">Avg return</span></th><th class="r"><span class="th">St. dev.</span></th><th class="r"><span class="th">Sharpe</span></th></tr></thead>
+            <tbody>${shRows}</tbody></table></div>
+          <p class="hint">${st.periods} periods a year, risk-free rate ${st.rf}%, ${st.sharpeMode === 'active' ? 'counting only days with trades' : 'counting every calendar day with flat days as 0'}. Change this in Settings. A dash means fewer than 2 days or no variation.</p></div>
+      </div>
+      <div class="grid g2">
+        <div class="card"><div class="card-title">By weekday</div><div class="card-sub">Net P&amp;L by day closed. The small number is the trade count.</div>${weekdayRows()}</div>
+        <div class="card"><div class="card-title"><span>By pair</span><span class="ctl"><span class="seg inline" role="group" aria-label="Ranking metric">
+          ${[['pnl', 'P&amp;L'], ['ret', 'Return'], ['n', 'Trades'], ['win', 'Win rate']].map(([k, l]) => `<button data-action="pair-metric" data-v="${k}" aria-pressed="${state.ui.pairMetric === k}">${l}</button>`).join('')}</span></span></div>
+          <div class="rank" id="pairs"></div></div>
+      </div>
+      <div class="card"><div class="card-title">By strategy</div>${strategyTable()}</div>`;
+    legend($('#lg-daily'), SERIES, drawDaily);
+    drawDaily();
+    drawPairs();
+    if (dd.maxDd < 0) {
+      lineChart($('#ch-dd'), {
+        rows: dd.rows, height: 220, fmtY: pctTick, label: 'Drawdown from peak balance',
+        series: [{ key: 'dd', label: 'Drawdown', color: 'var(--neg)', area: true, get: r => r.dd }],
+        tip: r => tipHTML(r.date, [{ color: 'var(--neg)', label: 'Drawdown', text: fmtPct(r.dd, 2) }, { color: 'var(--c-short)', label: 'Balance', text: fmtMoney(r.equity) }]),
+      });
+    }
+  });
+}
+
+/* ---------- Summary ---------- */
+function summaryStats(list) {
+  const n = list.length;
+  const wins = list.filter(t => isNum(t.pnl) && t.pnl > 0).length;
+  const losses = list.filter(t => isNum(t.pnl) && t.pnl < 0).length;
+  const be = n - wins - losses;
+  const rs = list.map(t => t.rMult).filter(isNum);
+  const totalR = sum(rs);
+  const bestR = rs.length ? Math.max(...rs) : null;
+  const worstR = rs.length ? Math.min(...rs) : null;
+  return { n, wins, losses, be, winRate: n ? wins / n : null, totalR, bestR, worstR, rCount: rs.length };
+}
+function renderSummary() {
+  const el = $('#v-summary');
+  if (!D.all.length) { el.innerHTML = emptyJournal(); return; }
+  if (!D.view.length) { el.innerHTML = emptyView(); return; }
+  keepScroll(el, () => {
+    const s = summaryStats(D.view);
+    const rNote = s.rCount ? `${s.rCount} of ${s.n} trade${s.n === 1 ? '' : 's'} logged a risk amount` : 'Log a risk amount per trade to see R multiples';
+    const cards = [
+      kpi('Total trades', String(s.n), `${state.ui.scope === 'all' ? 'All sides' : state.ui.scope === 'long' ? 'Long only' : 'Short only'}`, 'accent'),
+      kpi('Total wins', String(s.wins), 'winning trades', 'green', 'pos'),
+      kpi('Total losses', String(s.losses), 'losing trades', 'red', s.losses ? 'neg' : ''),
+      kpi('Break-even', String(s.be), 'net to zero', 'amber'),
+      kpi('Win rate', fmtPct(s.winRate, 1), `${s.wins}W · ${s.losses}L · ${s.be}BE`, 'purple'),
+      kpi('Total R', s.rCount ? fmtNum(s.totalR) + 'R' : '—', rNote, 'cyan', sgnCls(s.totalR)),
+      kpi('Best trade R', isNum(s.bestR) ? fmtNum(s.bestR) + 'R' : '—', 'largest R multiple', 'green', s.bestR > 0 ? 'pos' : ''),
+      kpi('Worst trade R', isNum(s.worstR) ? fmtNum(s.worstR) + 'R' : '—', 'smallest R multiple', 'red', s.worstR < 0 ? 'neg' : ''),
+    ];
+    el.innerHTML = `<div class="grid kpis">${cards.join('')}</div>`;
+  });
+}
+function drawDaily() {
+  const host = $('#ch-daily');
+  if (!host) return;
+  const acc = { long: r => r.longs, short: r => r.shorts, total: r => r.total };
+  const series = SERIES.map(s => Object.assign({}, s, { visible: state.ui.vis[s.key], get: acc[s.key] }));
+  barChart(host, {
+    rows: D.ds, series, height: 260, fmtY: pctTick, label: 'Daily returns for long, short and total trades',
+    tip: (r, act) => {
+      const items = act.filter(s => isNum(s.get(r))).map(s => ({ color: s.color, label: s.label, text: fmtPct(s.get(r), 2, true) }));
+      return items.length ? tipHTML(r.date, items) : `<b>${esc(r.date)}</b>No trades`;
+    },
+  });
+}
+function weekdayRows() {
+  const g = groupStats(D.view, t => dow(t.date)), by = new Map(g.map(o => [o.key, o]));
+  const order = [1, 2, 3, 4, 5, 6, 0].filter(d => (d >= 1 && d <= 5) || by.has(d));
+  const max = Math.max(1e-9, ...g.map(o => Math.abs(o.pnl)));
+  return order.map(d => {
+    const o = by.get(d);
+    if (!o) return `<div class="div-row"><span>${DAYS[d]}</span><div class="div-track"></div><span class="div-val faint">—</span></div>`;
+    const w = (Math.abs(o.pnl) / max * 50).toFixed(1);
+    return `<div class="div-row"><span>${DAYS[d]} <span class="faint">${o.n}</span></span><div class="div-track"><i class="${o.pnl >= 0 ? 'p' : 'n'}" style="width:${w}%"></i></div>
+      <span class="div-val ${sgnCls(o.pnl)}">${fmtMoney(o.pnl, true)}</span></div>`;
+  }).join('');
+}
+function drawPairs() {
+  const host = $('#pairs');
+  if (!host) return;
+  const m = state.ui.pairMetric;
+  const val = o => (m === 'pnl' ? o.pnl : m === 'ret' ? o.ret : m === 'n' ? o.n : o.winRate);
+  const fmt = o => (m === 'pnl' ? fmtMoney(o.pnl, true) : m === 'ret' ? fmtPct(o.ret, 2, true) : m === 'n' ? String(o.n) : fmtPct(o.winRate, 0));
+  const list = groupStats(D.view, t => t.pair || '').sort((a, b) => val(b) - val(a)).slice(0, 8);
+  const max = Math.max(1e-9, ...list.map(o => Math.abs(val(o))));
+  host.innerHTML = list.map((o, i) => {
+    const v = val(o), w = m === 'win' ? v * 100 : Math.abs(v) / max * 100;
+    const cls = m === 'pnl' || m === 'ret' ? (v >= 0 ? 'p' : 'n') : '';
+    const name = o.key || 'No pair';
+    return `<button class="rank-row" data-action="drill-pair" data-pair="${esc(o.key || '__none__')}" aria-label="Show trades for ${esc(name)}">
+      <span class="rk ${i < 3 ? 'r' + (i + 1) : ''}">${i + 1}</span>
+      <span><span class="rank-name">${esc(name)}<span>${o.n} trade${o.n > 1 ? 's' : ''} · ${fmtPct(o.winRate, 0)} won</span></span><span class="bar"><i class="${cls}" style="width:${w.toFixed(1)}%"></i></span></span>
+      <span class="rank-val ${m === 'pnl' || m === 'ret' ? sgnCls(v) : ''}">${fmt(o)}</span></button>`;
+  }).join('');
+}
+function strategyTable() {
+  const list = groupStats(D.view, t => t.tag || '').sort((a, b) => b.pnl - a.pnl);
+  const max = Math.max(1e-9, ...list.map(o => Math.abs(o.pnl)));
+  const onlyUntagged = list.length === 1 && list[0].key === '';
+  return (onlyUntagged ? '<div class="note" style="margin-bottom:10px">Add a strategy when you log a trade to compare setups here.</div>' : '') +
+    `<div style="overflow-x:auto"><table class="tbl compact"><thead><tr><th><span class="th">Strategy</span></th><th class="r"><span class="th">Trades</span></th>
+    <th class="r"><span class="th">Win rate</span></th><th class="r"><span class="th">Total P&amp;L</span></th><th class="r"><span class="th">Avg return</span></th><th style="min-width:120px"><span class="th"><span class="sr">Share</span></span></th></tr></thead><tbody>` +
+    list.map(o => `<tr class="click" data-action="drill-tag" data-tag="${esc(o.key || '__none__')}" tabindex="0"><td class="pair">${esc(o.key) || '<span class="faint">Untagged</span>'}</td>
+      <td class="r">${o.n}</td><td class="r">${fmtPct(o.winRate, 0)}</td><td class="r ${sgnCls(o.pnl)}"><b>${fmtMoney(o.pnl, true)}</b></td>
+      <td class="r ${sgnCls(o.ret)}">${fmtPct(o.n ? o.ret / o.n : null, 2, true)}</td>
+      <td><span class="bar"><i class="${o.pnl >= 0 ? 'p' : 'n'}" style="width:${(Math.abs(o.pnl) / max * 100).toFixed(1)}%"></i></span></td></tr>`).join('') + '</tbody></table></div>';
+}
+
+/* ---------- Trades ---------- */
+const COLS = [['tradeNo', '#', 'r'], ['date', 'Date'], ['assetType', 'Market'], ['pair', 'Pair'], ['side', 'Side'], ['timeframe', 'TF'],
+  ['lots', 'Lots', 'r'], ['entry', 'Entry', 'r'], ['exit', 'Exit', 'r'],
+  ['pnl', 'P&L', 'r'], ['equity', 'Account', 'r'], ['ret', 'Return', 'r'], ['rMult', 'R', 'r'],
+  ['screenshotBefore', 'SS Before'], ['screenshotAfter', 'SS After'], ['tag', 'Strategy'], ['notes', 'Notes']];
+function fillSelect(sel, opts, cur) {
+  sel.innerHTML = opts.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('');
+  sel.value = opts.some(o => o[0] === cur) ? cur : '';
+  return sel.value;
+}
+function filteredTrades() {
+  const u = state.ui;
+  let list = D.view;
+  if (u.tq) { const q = u.tq.toLowerCase(); list = list.filter(t => [t.date, t.pair, t.tag, t.notes, t.side, t.timeframe].join(' ').toLowerCase().includes(q)); }
+  if (u.tasset) list = list.filter(t => t.assetType === u.tasset);
+  if (u.tpair) list = list.filter(t => (u.tpair === '__none__' ? !t.pair : t.pair === u.tpair));
+  if (u.ttag) list = list.filter(t => (u.ttag === '__none__' ? !t.tag : t.tag === u.ttag));
+  if (u.tout) list = list.filter(t => (u.tout === 'win' ? t.pnl > 0 : u.tout === 'loss' ? t.pnl < 0 : t.pnl === 0));
+  if (u.tday) list = list.filter(t => t.date === u.tday);
+  const { key, dir } = u.sort;
+  const empty = x => x === null || x === undefined || x === '';
+  return list.slice().sort((a, b) => {
+    const x = a[key], y = b[key];
+    if (empty(x) && empty(y)) return a.seq - b.seq;
+    if (empty(x)) return 1;
+    if (empty(y)) return -1;
+    const c = typeof x === 'number' ? x - y : String(x).localeCompare(String(y));
+    if (c) return c * dir;
+    return (a.date < b.date ? -1 : a.date > b.date ? 1 : a.seq - b.seq) * dir;
+  });
+}
+function tradeRow(t) {
+  const ssBadge = v => `<span class="badge ${v ? 'b-yes' : 'b-no'}">${v ? 'YES' : 'NO'}</span>`;
+  return `<tr><td class="r dim">${t.tradeNo}</td><td>${t.date}</td>
+    <td><span class="badge ${t.assetType === 'crypto' ? 'b-crypto' : 'b-forex'}">${t.assetType === 'crypto' ? 'CRYPTO' : 'FOREX'}</span></td>
+    <td class="pair">${esc(t.pair) || '<span class="faint">—</span>'}</td>
+    <td><span class="badge ${t.side === 'long' ? 'b-long' : 'b-short'}">${t.side === 'long' ? 'LONG' : 'SHORT'}</span></td>
+    <td>${esc(t.timeframe) || '<span class="faint">—</span>'}</td>
+    <td class="r">${fmtLots(t.lots)}</td><td class="r">${fmtPx(t.entry)}</td><td class="r">${fmtPx(t.exit)}</td>
+    <td class="r ${sgnCls(t.pnl)}"><b>${fmtMoney(t.pnl, true)}</b></td>
+    <td class="r">${fmtMoney(t.equity)}${t.equityAuto ? '' : '<span class="manual" title="Account size entered manually">M</span>'}</td>
+    <td class="r ${sgnCls(t.ret)}">${fmtPct(t.ret, 2, true)}</td>
+    <td class="r ${sgnCls(t.rMult)}">${isNum(t.rMult) ? fmtNum(t.rMult) + 'R' : '—'}</td>
+    <td>${ssBadge(t.screenshotBefore)}</td><td>${ssBadge(t.screenshotAfter)}</td>
+    <td>${esc(t.tag) || '<span class="faint">—</span>'}</td><td class="ellip" title="${esc(t.notes)}">${esc(t.notes)}</td>
+    <td class="act"><button data-action="edit" data-id="${t.id}" aria-label="Edit trade on ${t.date}">Edit</button><button class="del" data-action="del" data-id="${t.id}" aria-label="Delete trade on ${t.date}">Delete</button></td></tr>`;
+}
+function renderTrades() {
+  const u = state.ui;
+  const pairs = [...new Set(D.all.map(t => t.pair).filter(Boolean))].sort();
+  const tags = [...new Set(D.all.map(t => t.tag).filter(Boolean))].sort();
+  u.tpair = fillSelect($('#t-pair'), [['', 'All pairs'], ...pairs.map(p => [p, p]), ...(D.all.some(t => !t.pair) ? [['__none__', 'No pair']] : [])], u.tpair);
+  u.ttag = fillSelect($('#t-tag'), [['', 'All strategies'], ...tags.map(p => [p, p]), ...(D.all.some(t => !t.tag) ? [['__none__', 'No strategy']] : [])], u.ttag);
+  $('#t-out').value = u.tout;
+  $('#t-asset').value = u.tasset;
+  $('#t-head').innerHTML = '<tr>' + COLS.map(([k, l, c]) =>
+    `<th class="${c || ''}" aria-sort="${u.sort.key === k ? (u.sort.dir > 0 ? 'ascending' : 'descending') : 'none'}"><button class="th" data-sort="${k}">${l === 'P&L' ? 'P&amp;L' : l}${u.sort.key === k ? (u.sort.dir > 0 ? ' ?' : ' ?') : ''}</button></th>`).join('') +
+    '<th><span class="th"><span class="sr">Actions</span></span></th></tr>';
+  const list = filteredTrades();
+  const per = u.per, pages = per ? Math.max(1, Math.ceil(list.length / per)) : 1;
+  u.page = Math.min(Math.max(1, u.page), pages);
+  const slice = per ? list.slice((u.page - 1) * per, u.page * per) : list;
+  const body = $('#t-body');
+  if (!D.all.length) {
+    body.innerHTML = `<tr><td colspan="${COLS.length + 1}"><div class="empty"><h2>No trades yet</h2><p>Add a trade, import a CSV, or load the sample journal.</p><div class="row"><button class="btn btn-blue" data-action="add">+ Add trade</button><button class="btn" data-action="import">? Import CSV</button><button class="btn" data-action="sample">Load sample</button></div></div></td></tr>`;
+  } else if (!list.length) {
+    body.innerHTML = `<tr><td colspan="${COLS.length + 1}"><div class="empty"><h2>No trades match</h2><p>Try a different search or clear the filters.</p><button class="btn btn-blue" data-action="clear-tfilters">Clear filters</button></div></td></tr>`;
+  } else body.innerHTML = slice.map(tradeRow).join('');
+  $('#t-count').textContent = D.all.length ? `Showing ${list.length} of ${D.all.length} trades` : 'No trades';
+  $('#t-chips').innerHTML = u.tday ? `<span class="fchip">Day ${u.tday}<button data-action="clear-day" aria-label="Remove day filter">?</button></span>` : '';
+  $('#t-pager').hidden = pages <= 1;
+  $('#t-pg').textContent = `${u.page} / ${pages}`;
+  $('#t-q').value = u.tq;
+  $('#t-per').value = String(u.per);
+}
+
+/* ---------- Calculator ---------- */
+function calcInputs() {
+  const g = id => $('#' + id).valueAsNumber;
+  return {
+    type: $('input[name=c-type]:checked').value,
+    pair: $('#c-pair').value, side: $('input[name=c-side]:checked').value, balance: g('c-bal'), riskPct: g('c-risk'), leverage: g('c-lev'),
+    entry: g('c-entry'), stop: g('c-stop'), exit: g('c-exit'), lotsUsed: g('c-used'), rate: g('c-rate'), lotStep: +$('#c-step').value, currency: state.settings.currency,
+  };
+}
+function renderCalc() {
+  if (!state.ui.calcReady) {
+    $('#c-bal').value = +D.balance.toFixed(2);
+    $('#c-risk').value = state.settings.riskPct;
+    $('#c-lev').value = state.settings.leverage;
+    state.ui.calcReady = true;
+  }
+  syncCalcLabels();
+  updateCalc();
+}
+function syncCalcLabels() {
+  const crypto = $('input[name=c-type]:checked').value === 'crypto';
+  $('#c-pair-lbl').textContent = crypto ? 'Crypto symbol' : 'Currency pair';
+  $('#c-pair').setAttribute('list', crypto ? 'dl-crypto' : 'dl-majors');
+  $('#c-pair').placeholder = crypto ? 'BTCUSDT' : '';
+  if (crypto && /^[A-Z]{6}$/.test($('#c-pair').value)) $('#c-pair').value = 'BTCUSDT';
+  if (!crypto && $('#c-pair').value.toUpperCase().endsWith('USDT')) $('#c-pair').value = 'USDCAD';
+  $('#c-used-lbl').textContent = crypto ? 'Quantity used (optional)' : 'Lots used (optional)';
+  $('#c-step-lbl').textContent = crypto ? 'Quantity step' : 'Lot step';
+  $('#c-rate-wrap').hidden = crypto || $('#c-rate-wrap').hidden;
+}
+function updateCalc() {
+  const i = calcInputs(), cur = state.settings.currency;
+  const hint = $('#c-pair-hint'), rateWrap = $('#c-rate-wrap');
+  let r;
+  if (i.type === 'crypto') {
+    rateWrap.hidden = true;
+    hint.textContent = i.pair ? `${i.pair.toUpperCase()}: assumes the quote asset (the USDT/USD part) is your account currency (${cur}).` : 'A symbol such as BTCUSDT.';
+    r = calcPositionCrypto(i);
+  } else {
+    const pr = parsePair(i.pair);
+    if (!pr) { hint.textContent = 'Six letters, for example EURUSD.'; rateWrap.hidden = true; }
+    else {
+      const kind = pr.quote === cur ? `the quote currency is your account currency (${cur})` : pr.base === cur ? `the base currency is your account currency (${cur})` : `a cross pair, so it needs a ${cur} rate`;
+      hint.textContent = `${pr.sym}: ${kind}. Pip size ${pr.quote === 'JPY' ? '0.01' : '0.0001'}, 1 lot = 100,000 units.`;
+      const cross = pr.quote !== cur && pr.base !== cur;
+      rateWrap.hidden = !cross;
+      if (cross) $('#c-rate-lbl').textContent = `1 ${pr.quote} is worth how many ${cur}?`;
+    }
+    r = calcPosition(i);
+  }
+  $('#c-bal-hint').innerHTML = `Journal balance ${esc(fmtMoney(D.balance))} <button class="btn btn-sm" data-action="calc-balance" type="button">Use it</button>`;
+  const out = $('#calc-out');
+  if (!r.ok) { out.innerHTML = `<div class="note ${r.level === 'error' ? 'error' : ''}">${esc(r.message)}</div>`; return; }
+  const nf = v => String(+v.toFixed(4));
+  const previewRow = isNum(r.previewPnl)
+    ? `<div><dt>Estimated P&amp;L at exit</dt><dd class="${sgnCls(r.previewPnl)}">${fmtMoney(r.previewPnl, true)}</dd><small>At the size used, entry to exit</small></div>` : '';
+  if (r.kind === 'crypto') {
+    out.innerHTML = `
+      <div class="lbl">Recommended size</div>
+      <div><span class="hero-num">${r.qtyRounded.toFixed(r.dp)}</span><span class="hero-unit">units</span></div>
+      <p class="hint">Exact size is ${nf(r.qtyExact)} units. Rounded down to the ${r.step} step so a stop-out never costs more than ${esc(fmtMoney(r.riskAmount))}.</p>
+      <dl class="kv">
+        <div><dt>Max loss</dt><dd>${fmtMoney(r.riskAmount)}</dd><small>${i.riskPct}% of ${fmtMoney(i.balance)}</small></div>
+        <div><dt>Stop distance</dt><dd>${nf(r.dist)}</dd><small>in price</small></div>
+        <div><dt>Quantity used</dt><dd>${nf(r.qtyUsed)}</dd><small>${r.custom ? 'Your size' : 'Recommended size'}</small></div>
+        <div><dt>Loss if stopped out</dt><dd class="neg">${fmtMoney(-r.riskAtUsed)}</dd><small>At the quantity used</small></div>
+        <div><dt>Position value</dt><dd>${fmtMoney(r.notional)}</dd><small>In ${cur}</small></div>
+        <div><dt>Margin required</dt><dd>${fmtMoney(r.margin)}</dd><small>At 1:${r.leverage}, in ${cur}</small></div>
+        ${previewRow}
+      </dl>
+      ${r.warnings.map(w => `<div class="note warn" style="margin-top:10px">${esc(w)}</div>`).join('')}
+      <div class="row" style="margin-top:14px"><button class="btn btn-blue" data-action="calc-log" type="button">Log this trade</button></div>`;
+  } else {
+    out.innerHTML = `
+      <div class="lbl">Recommended size</div>
+      <div><span class="hero-num">${r.lotsRounded.toFixed(r.dp)}</span><span class="hero-unit">lots</span></div>
+      <p class="hint">Exact size is ${nf(r.lotsExact)} lots. It is rounded down to the ${r.step} step so a stop-out never costs more than ${esc(fmtMoney(r.riskAmount))}.</p>
+      <dl class="kv">
+        <div><dt>Max loss</dt><dd>${fmtMoney(r.riskAmount)}</dd><small>${i.riskPct}% of ${fmtMoney(i.balance)}</small></div>
+        <div><dt>Stop distance</dt><dd>${r.pips.toFixed(1)} pips</dd><small>${nf(r.dist)} in price</small></div>
+        <div><dt>Lots used</dt><dd>${nf(r.lotsUsed)}</dd><small>${r.custom ? 'Your size' : 'Recommended size'}</small></div>
+        <div><dt>Loss if stopped out</dt><dd class="neg">${fmtMoney(-r.riskAtUsed)}</dd><small>At the lots used</small></div>
+        <div><dt>Position value</dt><dd>${fmtMoney(r.notional)}</dd><small>In ${cur}</small></div>
+        <div><dt>Margin required</dt><dd>${fmtMoney(r.margin)}</dd><small>At 1:${i.leverage}, in ${cur}</small></div>
+        <div><dt>Pip value per lot</dt><dd>${fmtMoney(r.pipValueLot)}</dd><small>In ${cur}</small></div>
+        <div><dt>Pip value at lots used</dt><dd>${fmtMoney(r.pipValueUsed)}</dd><small>In ${cur}</small></div>
+        ${previewRow}
+      </dl>
+      ${r.warnings.map(w => `<div class="note warn" style="margin-top:10px">${esc(w)}</div>`).join('')}
+      <div class="row" style="margin-top:14px"><button class="btn btn-blue" data-action="calc-log" type="button">Log this trade</button></div>`;
+  }
+}
+
+/* ---------- Analytics / chrome ---------- */
+function setTab(t) {
+  state.ui.tab = t;
+  $$('.view').forEach(v => (v.hidden = v.id !== 'v-' + t));
+  $$('[data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t));
+  renderActive();
+  closeMenu();
+}
+function renderActive() {
+  const t = state.ui.tab;
+  if (t === 'dash') renderDash();
+  else if (t === 'trades') renderTrades();
+  else if (t === 'calc') renderCalc();
+  else if (t === 'summary') renderSummary();
+  else renderAnalytics();
+}
+function presetFrom(p, anchor) {
+  return p === '7d' ? addDays(anchor, -6) : p === '30d' ? addDays(anchor, -29) : p === '90d' ? addDays(anchor, -89) : p === 'ytd' ? anchor.slice(0, 4) + '-01-01' : '';
+}
+function renderAll() {
+  if (state.ui.preset && state.ui.preset !== 'all') {
+    const anchor = state.trades.length ? state.trades.reduce((m, t) => (t.date > m ? t.date : m), '0000') : todayISO();
+    state.ui.from = presetFrom(state.ui.preset, anchor); state.ui.to = '';
+  }
+  recompute();
+  syncChrome();
+  renderActive();
+}
+function syncChrome() {
+  const u = state.ui;
+  $$('input[name=scope]').forEach(r => (r.checked = r.value === u.scope));
+  $('#d-from').value = u.from; $('#d-to').value = u.to;
+  $$('[data-preset]').forEach(b => b.setAttribute('aria-pressed', b.dataset.preset === u.preset));
+  $('#s-trades').textContent = D.all.length;
+  $('#s-view').textContent = D.view.length;
+  $('#s-bal').textContent = fmtMoney(D.balance);
+  $('#s-last').textContent = D.all.length ? D.anchor : '—';
+  $('#s-store').textContent = CLOUD_ENABLED ? (cloudUser ? `Cloud · ${cloudUser.email}` : 'Cloud (signed out)') : (storageOk ? 'This browser' : 'Off');
+  $('#pingData').className = 'dot' + (D.all.length ? ' ok' : ' warn');
+  $('#pingDataTxt').textContent = D.all.length ? `${D.all.length} trades` : 'No trades';
+  if (!CLOUD_ENABLED) {
+    $('#pingSave').className = 'dot' + (storageOk ? ' ok' : '');
+    $('#pingSaveTxt').textContent = storageOk ? 'Saved in this browser' : 'Not saved: export a CSV';
+  }
+  const from = u.from || (D.all[0] ? D.all[0].date : '—'), to = u.to || 'latest';
+  $('#scopeNote').textContent = D.all.length ? `${u.scope === 'all' ? 'All sides' : u.scope === 'long' ? 'Long only' : 'Short only'} · ${from} to ${to} · ${D.view.length} trades` : '';
+  $('#dl-pairs').innerHTML = [...new Set(D.all.map(t => t.pair).filter(Boolean))].map(p => `<option value="${esc(p)}">`).join('');
+  $('#dl-tags').innerHTML = [...new Set(D.all.map(t => t.tag).filter(Boolean))].map(p => `<option value="${esc(p)}">`).join('');
+}
+const openMenu = () => { $('#side').classList.add('open'); $('#scrim').classList.add('show'); };
+const closeMenu = () => { $('#side').classList.remove('open'); $('#scrim').classList.remove('show'); };
+function setScope(v) {
+  state.ui.scope = v;
+  state.ui.vis = { long: v !== 'short', short: v !== 'long', total: v === 'all' };
+  state.ui.page = 1;
+  renderAll();
+}
+function resetFilters() {
+  Object.assign(state.ui, { scope: 'all', from: '', to: '', preset: 'all', tq: '', tasset: '', tpair: '', ttag: '', tout: '', tday: '', page: 1, vis: { long: true, short: true, total: true } });
+  renderAll();
+}
+
+/* ==========================================================================
+   DIALOGS + ACTIONS
+   ========================================================================== */
+function ask(title, message, okLabel = 'OK', danger = false, noCancel = false) {
+  return new Promise(res => {
+    const d = $('#dlg-confirm');
+    $('#dc-title').textContent = title;
+    $('#dc-msg').innerHTML = message;
+    const ok = $('#dc-ok');
+    ok.textContent = okLabel;
+    ok.className = 'btn ' + (danger ? 't-red' : 'btn-blue');
+    $('#dc-cancel').hidden = noCancel;
+    d.returnValue = '';
+    d.addEventListener('close', () => res(d.returnValue === 'ok'), { once: true });
+    d.showModal();
+  });
+}
+function autoEquity(date, id) {
+  const orig = id ? state.trades.find(t => t.id === id) : null;
+  const stub = Object.assign({}, orig || { id: '__new__', seq: state.seq + 1, side: 'long', pnl: 0 }, { accountSize: null, date });
+  const list = state.trades.filter(t => t.id !== id).concat([stub]);
+  const hit = enrich(list, state.settings.startBalance).find(t => t.id === stub.id);
+  return hit ? hit.equity : state.settings.startBalance;
+}
+const setNum = (id, v) => { $('#' + id).value = isNum(v) ? v : ''; };
+function updateAcctPlaceholder() {
+  const d = $('#f-date').value;
+  $('#f-acct').placeholder = isIso(d) ? 'Auto: ' + fmtMoney(autoEquity(d, state.ui.editing)) : 'Auto';
+}
+function openTrade(id, pre) {
+  state.ui.editing = id || null;
+  const t = id ? state.trades.find(x => x.id === id) : null, p = t || pre || {};
+  $('#dt-title').textContent = t ? 'Edit trade' : 'Add trade';
+  $('#f-date').value = p.date || (D.all.length ? D.anchor : todayISO());
+  const crypto = p.assetType === 'crypto';
+  $('#f-forex').checked = !crypto; $('#f-crypto').checked = crypto;
+  $('#f-pair').value = p.pair || '';
+  $('#f-tf').value = p.timeframe || '';
+  $('#f-long').checked = p.side === 'long'; $('#f-short').checked = p.side === 'short';
+  setNum('f-pnl', p.pnl); setNum('f-acct', t ? t.accountSize : null);
+  setNum('f-lots', p.lots); setNum('f-risk', p.risk); setNum('f-entry', p.entry); setNum('f-exit', p.exit); setNum('f-stop', p.stop);
+  $('#f-ssb-yes').checked = !!p.screenshotBefore; $('#f-ssb-no').checked = !p.screenshotBefore;
+  $('#f-ssa-yes').checked = !!p.screenshotAfter; $('#f-ssa-no').checked = !p.screenshotAfter;
+  $('#f-tag').value = p.tag || ''; $('#f-notes').value = p.notes || '';
+  $('#f-more').open = !!(p.lots || p.risk || p.entry || p.exit || p.stop || p.screenshotBefore || p.screenshotAfter);
+  $$('#f-trade .err').forEach(e => { e.hidden = true; });
+  $$('#f-trade .invalid').forEach(e => e.classList.remove('invalid'));
+  updateAcctPlaceholder();
+  $('#dlg-trade').showModal();
+  $('#f-date').focus();
+}
+function fieldErr(id, errId, msg) {
+  const e = $('#' + errId);
+  e.textContent = msg; e.hidden = false;
+  if (id) $('#' + id).classList.add('invalid');
+}
+function saveTrade() {
+  $$('#f-trade .err').forEach(e => { e.hidden = true; });
+  $$('#f-trade .invalid').forEach(e => e.classList.remove('invalid'));
+  const date = $('#f-date').value, sideEl = $('input[name=f-side]:checked'), pnl = $('#f-pnl').valueAsNumber, acct = $('#f-acct').valueAsNumber;
+  let first = null;
+  const bad = (id, errId, msg) => { fieldErr(id, errId, msg); first = first || id || 'f-long'; };
+  if (!isIso(date)) bad('f-date', 'e-date', 'Enter the day the trade closed, between 1990 and 2100.');
+  if (!sideEl) bad(null, 'e-side', 'Choose Long or Short.');
+  if (!Number.isFinite(pnl)) bad('f-pnl', 'e-pnl', 'Enter profit or loss as a number, for example 45.50 or -20.');
+  if (Number.isFinite(acct) && acct <= 0) bad('f-acct', 'e-acct', 'Account size must be above 0, or leave it blank.');
+  if (first) { $('#' + first).focus(); return; }
+  const opt = id => { const v = $('#' + id).valueAsNumber; return Number.isFinite(v) ? v : null; };
+  const marketEl = $('input[name=f-market]:checked');
+  const data = normTrade({
+    date, side: sideEl.value, pnl, accountSize: Number.isFinite(acct) ? acct : null, pair: $('#f-pair').value,
+    assetType: marketEl && marketEl.value === 'crypto' ? 'crypto' : 'forex', timeframe: $('#f-tf').value,
+    lots: opt('f-lots'), risk: opt('f-risk'), entry: opt('f-entry'), exit: opt('f-exit'), stop: opt('f-stop'),
+    screenshotBefore: $('#f-ssb-yes').checked, screenshotAfter: $('#f-ssa-yes').checked,
+    tag: $('#f-tag').value, notes: $('#f-notes').value,
+  });
+  const id = state.ui.editing;
+  if (id) { const i = state.trades.findIndex(t => t.id === id); data.id = id; data.seq = state.trades[i].seq; state.trades[i] = data; }
+  else { data.seq = ++state.seq; state.trades.push(data); }
+  save();
+  $('#dlg-trade').close();
+  renderAll();
+  toast('Trade saved');
+}
+async function deleteTrade(id) {
+  const t = state.trades.find(x => x.id === id);
+  if (!t) return;
+  if (!await ask('Delete trade', `Delete the ${esc(t.side)} trade${t.pair ? ' on ' + esc(t.pair) : ''} from ${esc(t.date)}? This can’t be undone.`, 'Delete', true)) return;
+  state.trades = state.trades.filter(x => x.id !== id);
+  save(); renderAll(); toast('Trade deleted');
+}
+function openSettings() {
+  const s = state.settings;
+  $('#s-start').value = s.startBalance; $('#s-cur').value = s.currency; $('#s-risk').value = s.riskPct; $('#s-lev').value = s.leverage;
+  $('#s-per').value = String(s.periods); $('#s-rf').value = s.rf; $('#s-mode').value = s.sharpeMode;
+  $$('#f-settings .err').forEach(e => { e.hidden = true; });
+  $$('#f-settings .invalid').forEach(e => e.classList.remove('invalid'));
+  $('#dlg-settings').showModal();
+}
+function saveSettings() {
+  $$('#f-settings .err').forEach(e => { e.hidden = true; });
+  $$('#f-settings .invalid').forEach(e => e.classList.remove('invalid'));
+  const start = $('#s-start').valueAsNumber, cur = $('#s-cur').value.trim().toUpperCase();
+  let ok = true;
+  if (!(start > 0)) { fieldErr('s-start', 'e-start', 'Enter a starting balance above 0.'); ok = false; }
+  let curOk = /^[A-Z]{3}$/.test(cur);
+  if (curOk) { try { new Intl.NumberFormat('en-US', { style: 'currency', currency: cur }); } catch (e) { curOk = false; } }
+  if (!curOk) { fieldErr('s-cur', 'e-cur', 'Use a 3-letter currency code such as USD or EUR.'); ok = false; }
+  if (!ok) return;
+  const num = (id, min, def) => { const v = $('#' + id).valueAsNumber; return Number.isFinite(v) && v >= min ? v : def; };
+  state.settings = cleanSettings({
+    startBalance: start, currency: cur, riskPct: num('s-risk', 0.0001, state.settings.riskPct), leverage: num('s-lev', 1, state.settings.leverage),
+    periods: +$('#s-per').value, rf: num('s-rf', 0, 0), sharpeMode: $('#s-mode').value,
+  });
+  save();
+  $('#dlg-settings').close();
+  renderAll();
+  toast('Settings saved');
+}
+function exportCSV() {
+  if (!D.all.length) { toast('Nothing to export yet'); return; }
+  const blob = new Blob(['\ufeff' + buildCSV(D.all)], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `fx-journal-${todayISO()}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  toast(`Exported ${D.all.length} trades`);
+}
+async function importFile(file) {
+  if (!file) return;
+  if (file.size > 5e6) { await ask('Import CSV', 'This file is larger than 5 MB. Split it into smaller files and try again.', 'OK', false, true); return; }
+  const { rows, delim } = parseCSV(await file.text());
+  const res = importRows(rows, delim);
+  const list = res.errors.slice(0, 8).map(e => `<li>Row ${e.row}: ${esc(e.msg)}</li>`).join('') + (res.errors.length > 8 ? `<li>…and ${res.errors.length - 8} more.</li>` : '');
+  if (!res.trades.length) {
+    await ask('Nothing imported', `<p>No valid trades were found in ${esc(file.name)}.</p>${list ? `<ul>${list}</ul>` : ''}<p style="margin-top:8px">Needs a header row with Date, Side (Long or Short) and PnL.</p>`, 'OK', false, true);
+    return;
+  }
+  for (const t of res.trades) { const n = normTrade(Object.assign({}, t, { id: uid(), seq: ++state.seq })); state.trades.push(n); }
+  save(); renderAll();
+  toast(`Imported ${res.trades.length} trade${res.trades.length > 1 ? 's' : ''}`);
+  if (res.errors.length) await ask('Some rows were skipped', `<p>${res.trades.length} imported, ${res.errors.length} skipped.</p><ul>${list}</ul>`, 'OK', false, true);
+}
+async function loadSample() {
+  if (state.trades.length && !await ask('Load sample journal', 'This replaces your current trades and sets the starting balance to $2,000. Export a CSV first if you want to keep them.', 'Replace', true)) return;
+  state.trades = SAMPLE_TRADES.map((t, i) => normTrade(Object.assign({}, t, { id: uid(), seq: i + 1 })));
+  state.seq = state.trades.length;
+  state.settings.startBalance = 2000;
+  Object.assign(state.ui, { scope: 'all', from: '', to: '', preset: 'all', tday: '', tpair: '', ttag: '', tout: '', tq: '', vis: { long: true, short: true, total: true } });
+  save(); renderAll(); toast('Sample journal loaded');
+}
+async function clearAll() {
+  if (!state.trades.length) { toast('The journal is already empty'); return; }
+  if (!await ask('Clear journal', `Delete all ${state.trades.length} trades? This can’t be undone. Export a CSV first if you want a backup.`, 'Delete all', true)) return;
+  state.trades = []; state.seq = 0;
+  save(); renderAll(); toast('Journal cleared');
+}
+function drill(patch) {
+  Object.assign(state.ui, { tq: '', tasset: '', tpair: '', ttag: '', tout: '', tday: '', page: 1 }, patch);
+  setTab('trades');
+}
+
+/* ---------- event wiring ---------- */
+document.addEventListener('click', e => {
+  const tab = e.target.closest('[data-tab]');
+  if (tab) { setTab(tab.dataset.tab); return; }
+  const pre = e.target.closest('[data-preset]');
+  if (pre) { state.ui.preset = pre.dataset.preset; if (state.ui.preset === 'all') { state.ui.from = ''; state.ui.to = ''; } renderAll(); return; }
+  const srt = e.target.closest('[data-sort]');
+  if (srt) {
+    const k = srt.dataset.sort, s = state.ui.sort;
+    state.ui.sort = s.key === k ? { key: k, dir: -s.dir } : { key: k, dir: k === 'date' ? -1 : 1 };
+    renderTrades(); return;
+  }
+  const a = e.target.closest('[data-action]');
+  if (!a) return;
+  const d = a.dataset;
+  switch (d.action) {
+    case 'menu': $('#side').classList.contains('open') ? closeMenu() : openMenu(); break;
+    case 'menu-close': closeMenu(); break;
+    case 'add': openTrade(); break;
+    case 'edit': openTrade(d.id); break;
+    case 'del': deleteTrade(d.id); break;
+    case 'export': exportCSV(); break;
+    case 'import': $('#file-in').click(); break;
+    case 'sample': loadSample(); break;
+    case 'clear': clearAll(); break;
+    case 'settings': openSettings(); break;
+    case 'help': $('#dlg-help').showModal(); break;
+    case 'theme': {
+      const light = document.body.classList.toggle('light');
+      try { localStorage.setItem(THEME_KEY, light ? 'light' : 'dark'); } catch (err) { /* ignore */ }
+      break;
+    }
+    case 'close-dlg': a.closest('dialog').close(); break;
+    case 'curve': state.ui.curve = d.v; $$('[data-action=curve]').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === d.v)); drawEquity(); break;
+    case 'pair-metric': state.ui.pairMetric = d.v; $$('[data-action=pair-metric]').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === d.v)); drawPairs(); break;
+    case 'day': drill({ tday: d.date }); break;
+    case 'drill-pair': drill({ tpair: d.pair }); break;
+    case 'drill-tag': drill({ ttag: d.tag }); break;
+    case 'goto-trades': setTab('trades'); break;
+    case 'reset-filters': resetFilters(); break;
+    case 'clear-tfilters': Object.assign(state.ui, { tq: '', tasset: '', tpair: '', ttag: '', tout: '', tday: '', page: 1 }); renderTrades(); break;
+    case 'clear-day': state.ui.tday = ''; state.ui.page = 1; renderTrades(); break;
+    case 'pg-prev': state.ui.page--; renderTrades(); break;
+    case 'pg-next': state.ui.page++; renderTrades(); break;
+    case 'calc-balance': $('#c-bal').value = +D.balance.toFixed(2); updateCalc(); break;
+    case 'calc-log': {
+      const i = calcInputs();
+      if (i.type === 'crypto') {
+        const r = calcPositionCrypto(i);
+        if (r.ok) openTrade(null, {
+          pair: r.sym, assetType: 'crypto', side: i.side, lots: r.qtyUsed, entry: i.entry, exit: isNum(i.exit) ? i.exit : null, stop: i.stop,
+          risk: +r.riskAtUsed.toFixed(2), pnl: isNum(r.previewPnl) ? +r.previewPnl.toFixed(2) : null,
+        });
+      } else {
+        const r = calcPosition(i);
+        if (r.ok) openTrade(null, {
+          pair: r.pair.sym, assetType: 'forex', side: i.side, lots: r.lotsUsed, entry: i.entry, exit: isNum(i.exit) ? i.exit : null, stop: i.stop,
+          risk: +r.riskAtUsed.toFixed(2), pnl: isNum(r.previewPnl) ? +r.previewPnl.toFixed(2) : null,
+        });
+      }
+      break;
+    }
+    case 'calc-pnl': {
+      const lots = $('#f-lots').valueAsNumber, entry = $('#f-entry').valueAsNumber, exit = $('#f-exit').valueAsNumber;
+      const sideEl = $('input[name=f-side]:checked');
+      if (!(lots > 0) || !Number.isFinite(entry) || !Number.isFinite(exit) || !sideEl) {
+        toast('Fill in Lots, Entry and Exit first'); break;
+      }
+      const crypto = $('#f-crypto').checked;
+      const sign = sideEl.value === 'long' ? 1 : -1;
+      const pnl = crypto ? (exit - entry) * lots * sign : (exit - entry) * lots * 100000 * sign;
+      $('#f-pnl').value = +pnl.toFixed(2);
+      toast('P&L calculated — adjust it by hand if you need to');
+      break;
+    }
+    case 'signout': if (sb) sb.auth.signOut(); break;
+    default: break;
+  }
+});
+document.addEventListener('keydown', e => {
+  const tab = e.target.closest && e.target.closest('[role=tab]');
+  if (tab && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+    const tabs = $$('[role=tab]'), i = tabs.indexOf(tab), n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+    n.focus(); setTab(n.dataset.tab); e.preventDefault(); return;
+  }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('tr.click')) { e.preventDefault(); e.target.click(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && $('#dlg-trade').open) { e.preventDefault(); saveTrade(); return; }
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
+  if (typing || e.ctrlKey || e.metaKey || e.altKey || $('dialog[open]')) return;
+  if (e.key === 'n') { e.preventDefault(); openTrade(); }
+  else if (e.key === '/') { e.preventDefault(); setTab('trades'); $('#t-q').focus(); }
+  else if (/^[1-5]$/.test(e.key)) setTab(['dash', 'trades', 'calc', 'analytics', 'summary'][+e.key - 1]);
+});
+$$('input[name=scope]').forEach(r => r.addEventListener('change', () => setScope(r.value)));
+['#d-from', '#d-to'].forEach(id => $(id).addEventListener('change', () => {
+  state.ui.from = $('#d-from').value; state.ui.to = $('#d-to').value; state.ui.preset = null; renderAll();
+}));
+$('#t-q').addEventListener('input', debounce(e => { state.ui.tq = e.target.value.trim(); state.ui.page = 1; renderTrades(); }, 120));
+$('#t-asset').addEventListener('change', e => { state.ui.tasset = e.target.value; state.ui.page = 1; renderTrades(); });
+$('#t-pair').addEventListener('change', e => { state.ui.tpair = e.target.value; state.ui.page = 1; renderTrades(); });
+$('#t-tag').addEventListener('change', e => { state.ui.ttag = e.target.value; state.ui.page = 1; renderTrades(); });
+$('#t-out').addEventListener('change', e => { state.ui.tout = e.target.value; state.ui.page = 1; renderTrades(); });
+$('#t-per').addEventListener('change', e => { state.ui.per = +e.target.value; state.ui.page = 1; renderTrades(); });
+$('#f-trade').addEventListener('submit', e => { e.preventDefault(); saveTrade(); });
+$('#f-settings').addEventListener('submit', e => { e.preventDefault(); saveSettings(); });
+$('#f-date').addEventListener('change', updateAcctPlaceholder);
+$('#file-in').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; importFile(f); });
+$('#v-calc').addEventListener('input', updateCalc);
+$('#v-calc').addEventListener('change', () => setTimeout(() => { syncCalcLabels(); updateCalc(); }, 0));
+$('#dlg-help').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.close(); });
+const heatHost = $('#v-dash');
+const onHeat = e => { const c = e.target.closest && e.target.closest('.hc[data-tip]'); if (c) showTip(c.dataset.tip, e.clientX, e.clientY, true); };
+heatHost.addEventListener('pointerover', onHeat);
+heatHost.addEventListener('pointermove', onHeat);
+heatHost.addEventListener('pointerout', e => { if (e.target.closest && e.target.closest('.hc[data-tip]')) hideTip(); });
+document.addEventListener('scroll', hideTip, true);
+window.addEventListener('resize', debounce(() => { if (state.ui.tab === 'dash' || state.ui.tab === 'analytics') renderActive(); }, 150));
+
+/* ---------- auth gate wiring ---------- */
+$$('[data-gate-tab]').forEach(b => b.addEventListener('click', () => setGateTab(b.dataset.gateTab)));
+$('#f-gate').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = $('#g-email').value.trim(), pass = $('#g-pass').value;
+  const mode = $('#f-gate').dataset.mode || 'signin';
+  const err = $('#gate-err'), msg = $('#gate-msg'), btn = $('#gate-submit');
+  err.hidden = true; msg.hidden = true;
+  if (!email || pass.length < 6) { err.textContent = 'Enter an email and a password of at least 6 characters.'; err.hidden = false; return; }
+  btn.disabled = true; btn.textContent = 'Please wait…';
+  try {
+    if (mode === 'signup') {
+      const { data, error } = await sb.auth.signUp({ email, password: pass });
+      if (error) throw error;
+      if (data.session) { /* onAuthStateChange handles sign-in */ }
+      else { msg.textContent = 'Account created. Check your email to confirm it, then sign in.'; msg.hidden = false; setGateTab('signin'); }
+    } else {
+      const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+      if (error) throw error;
+    }
+  } catch (e2) {
+    err.textContent = e2.message || 'Something went wrong. Try again.'; err.hidden = false;
+  } finally {
+    btn.disabled = false; btn.textContent = mode === 'signup' ? 'Create account' : 'Sign in';
+  }
+});
+
+/* ---------- start ---------- */
+if (CLOUD_ENABLED) { loadTheme(); renderAll(); initAuth(); } else { load(); renderAll(); }
+
+</script>
+</body>
+</html>
