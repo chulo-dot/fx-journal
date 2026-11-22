@@ -290,6 +290,13 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .scrim{display:none}
 
+.ic{width:1.1em;height:1.1em;vertical-align:-.17em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.upload-box .g .ic{width:18px;height:18px}
+.badge.b-bt{background:var(--accent-dim);color:var(--accent)}.badge.b-fw{background:var(--amber-dim);color:var(--amber)}.badge.b-lv{background:var(--green-dim);color:var(--green)}
+.edge-sec{margin-bottom:10px;overflow-x:auto}.edge-sec .tbl{min-width:560px}
+.ins{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ins ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:5px;font-size:12px}
+@media (max-width:720px){.ins{grid-template-columns:minmax(0,1fr)}}
 /* ---------- responsive ---------- */
 @media (max-width:1180px){
   .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -306,6 +313,17 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
   .pings{display:none}
   .toolbar,.view{padding-left:12px;padding-right:12px}
   .tr-tools .search{width:100%}
+}
+@media (max-width:720px){
+  .inp,.sel,textarea{font-size:16px!important}
+  .nav-tabs{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .nav-tabs button{flex:none;padding:8px 13px;min-height:38px}
+  .btn{min-height:36px}
+  dialog{width:100vw!important;max-width:100vw!important;max-height:100dvh!important;height:100dvh;border-radius:0;border:0}
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .hdr{padding:0 8px;gap:6px}
+  .brand{font-size:10px}
+  .scope-note{display:none}
 }
 @media (max-width:520px){
   .kpis{gap:8px}
@@ -352,7 +370,7 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
 </div>
 <div class="app">
   <header class="hdr">
-    <button class="btn btn-sm menu-btn" data-action="menu" aria-label="Open filters and data menu" aria-controls="side">?</button>
+    <button class="btn btn-sm menu-btn" data-action="menu" aria-label="Open filters and data menu" aria-controls="side"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
     <div class="brand">FX Journal<span class="tag">v1.0</span></div>
     <span class="vsep"></span>
     <div class="pings" role="status" aria-label="Status">
@@ -361,10 +379,10 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
     </div>
     <div class="hdr-actions">
       <button class="btn btn-blue" data-action="add" title="Add trade (N)">+<span class="hide-sm">&nbsp;Add trade</span><span class="sr"> Add trade</span></button>
-      <button class="btn t-green hide-sm" data-action="export">? Export CSV</button>
-      <button class="btn" data-action="settings" aria-label="Settings">?<span class="hide-sm">&nbsp;Settings</span></button>
-      <button class="btn" data-action="help" aria-label="Help">?<span class="hide-sm">&nbsp;Help</span></button>
-      <button class="btn" data-action="theme" aria-label="Switch light or dark theme">?</button>
+      <button class="btn t-green hide-sm" data-action="export"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m-4-4 4 4 4-4M5 20h14"/></svg> Export CSV</button>
+      <button class="btn" data-action="settings" aria-label="Settings"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg><span class="hide-sm">&nbsp;Settings</span></button>
+      <button class="btn" data-action="help" aria-label="Help"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01"/></svg><span class="hide-sm">&nbsp;Help</span></button>
+      <button class="btn" data-action="theme" aria-label="Switch light or dark theme"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg></button>
       <button class="btn hide-sm" data-action="signout" id="btn-signout" hidden>Sign out</button>
     </div>
   </header>
@@ -398,12 +416,12 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
     <div class="side-group">
       <div class="section-title">Data</div>
       <div class="stack">
-        <button class="upload-box" data-action="import"><span class="g">?</span><span>Import CSV<small>Date, Account Size, Side, PnL</small></span></button>
+        <button class="upload-box" data-action="import"><span class="g"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V9m-4 4 4-4 4 4M5 4h14"/></svg></span><span>Import CSV<small>Date, Account Size, Side, PnL</small></span></button>
         <div class="row">
-          <button class="btn btn-sm" data-action="export" style="flex:1;justify-content:center">? Export CSV</button>
+          <button class="btn btn-sm" data-action="export" style="flex:1;justify-content:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m-4-4 4 4 4-4M5 20h14"/></svg> Export CSV</button>
           <button class="btn btn-sm t-cyan" data-action="sample" style="flex:1;justify-content:center">Load sample</button>
         </div>
-        <button class="btn btn-sm t-red" data-action="clear" style="justify-content:center">? Clear journal</button>
+        <button class="btn btn-sm t-red" data-action="clear" style="justify-content:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg> Clear journal</button>
       </div>
     </div>
 
@@ -425,6 +443,7 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
         <button role="tab" id="tab-calc" data-tab="calc" aria-selected="false" aria-controls="v-calc">Calculator</button>
         <button role="tab" id="tab-analytics" data-tab="analytics" aria-selected="false" aria-controls="v-analytics">Analytics</button>
         <button role="tab" id="tab-summary" data-tab="summary" aria-selected="false" aria-controls="v-summary">Summary</button>
+        <button role="tab" id="tab-edge" data-tab="edge" aria-selected="false" aria-controls="v-edge">Edge</button>
       </div>
       <span class="scope-note" id="scopeNote" aria-live="polite"></span>
     </div>
@@ -437,6 +456,8 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
           <label class="sr" for="t-q">Search trades</label>
           <input class="inp search" type="search" id="t-q" placeholder="Search pair, strategy, notes…  ( / )" autocomplete="off">
           <label class="sr" for="t-asset">Filter by market</label>
+          <label class="sr" for="t-mode">Filter by test type</label>
+          <select class="sel" id="t-mode"><option value="">All test types</option><option value="backtest">Backtest</option><option value="forward">Forward test</option><option value="live">Live</option></select>
           <select class="sel" id="t-asset">
             <option value="">Forex &amp; crypto</option><option value="forex">Forex</option><option value="crypto">Crypto</option>
           </select>
@@ -446,7 +467,7 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
           <select class="sel" id="t-out">
             <option value="">All outcomes</option><option value="win">Wins</option><option value="loss">Losses</option><option value="be">Break-even</option>
           </select>
-          <button class="btn btn-sm" data-action="clear-tfilters">? Clear</button>
+          <button class="btn btn-sm" data-action="clear-tfilters"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg> Clear</button>
         </div>
         <div class="card table-card">
           <div class="meta">
@@ -454,9 +475,9 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
             <span id="t-chips"></span>
             <span class="grow"></span>
             <span id="t-pager" class="row" hidden>
-              <button class="btn btn-sm" data-action="pg-prev" aria-label="Previous page">?</button>
+              <button class="btn btn-sm" data-action="pg-prev" aria-label="Previous page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
               <span id="t-pg" aria-live="polite"></span>
-              <button class="btn btn-sm" data-action="pg-next" aria-label="Next page">?</button>
+              <button class="btn btn-sm" data-action="pg-next" aria-label="Next page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
             </span>
             <label class="sr" for="t-per">Rows per page</label>
             <select class="sel" id="t-per" style="width:auto;padding:3px 22px 3px 8px;font-size:10.5px">
@@ -475,74 +496,28 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
           <div class="card">
             <div class="card-title">Position size</div>
             <div class="fields">
-              <div class="full">
-                <span class="lbl" id="c-type-lbl">Market</span>
-                <div class="seg" role="radiogroup" aria-labelledby="c-type-lbl">
-                  <input type="radio" name="c-type" id="c-type-forex" value="forex" checked><label for="c-type-forex">Forex</label>
-                  <input type="radio" name="c-type" id="c-type-crypto" value="crypto"><label for="c-type-crypto">Crypto</label>
-                </div>
-              </div>
-              <div class="full">
-                <label class="lbl" for="c-pair" id="c-pair-lbl">Currency pair</label>
-                <input class="inp" id="c-pair" list="dl-majors" value="USDCAD" autocomplete="off" maxlength="16">
-                <div class="hint" id="c-pair-hint"></div>
-              </div>
-              <div class="full">
-                <span class="lbl" id="c-side-lbl">Side</span>
-                <div class="seg" role="radiogroup" aria-labelledby="c-side-lbl">
-                  <input type="radio" name="c-side" id="c-long" value="long" checked><label for="c-long">Long</label>
-                  <input type="radio" name="c-side" id="c-short" value="short"><label for="c-short">Short</label>
-                </div>
-              </div>
-              <div>
-                <label class="lbl" for="c-bal">Account balance</label>
-                <input class="inp" type="number" step="any" min="0" id="c-bal" inputmode="decimal">
-              </div>
-              <div>
-                <label class="lbl" for="c-risk">Max loss per trade (%)</label>
-                <input class="inp" type="number" step="any" min="0" id="c-risk" inputmode="decimal">
-              </div>
+              <div class="full"><span class="lbl">Market</span><div class="seg" role="radiogroup"><input type="radio" name="c-type" id="c-type-forex" value="forex" checked><label for="c-type-forex">Forex</label><input type="radio" name="c-type" id="c-type-gold" value="gold"><label for="c-type-gold">Gold</label><input type="radio" name="c-type" id="c-type-crypto" value="crypto"><label for="c-type-crypto">Crypto</label></div></div>
+              <div class="full"><span class="lbl">Account currency</span><div class="seg" role="radiogroup"><input type="radio" name="c-cur" id="c-cur-USDT" value="USDT" checked><label for="c-cur-USDT">USDT</label><input type="radio" name="c-cur" id="c-cur-USD" value="USD"><label for="c-cur-USD">USD</label></div></div>
+              <div class="full"><label class="lbl" for="c-pair" id="c-pair-lbl">Symbol</label><input class="inp" id="c-pair" list="dl-majors" value="USDCAD" autocomplete="off" maxlength="16"><div class="hint" id="c-pair-hint"></div></div>
+              <div class="full"><span class="lbl">Side</span><div class="seg" role="radiogroup"><input type="radio" name="c-side" id="c-side-long" value="long" checked><label for="c-side-long">Long</label><input type="radio" name="c-side" id="c-side-short" value="short"><label for="c-side-short">Short</label></div></div>
+              <div><label class="lbl" for="c-bal" id="c-bal-lbl">Account balance</label><input class="inp" type="number" step="any" min="0" id="c-bal" inputmode="decimal" placeholder=""></div><div><label class="lbl" for="c-risk" id="c-risk-lbl">Max loss per trade (%)</label><input class="inp" type="number" step="any" min="0" id="c-risk" inputmode="decimal" placeholder=""></div>
               <div class="full hint" id="c-bal-hint" style="margin-top:-6px"></div>
-              <div>
-                <label class="lbl" for="c-entry">Entry price</label>
-                <input class="inp" type="number" step="any" min="0" id="c-entry" inputmode="decimal" placeholder="1.35000">
-              </div>
-              <div>
-                <label class="lbl" for="c-stop">Stop loss price</label>
-                <input class="inp" type="number" step="any" min="0" id="c-stop" inputmode="decimal" placeholder="1.34500">
-              </div>
-              <div>
-                <label class="lbl" for="c-exit">Exit / target price (optional)</label>
-                <input class="inp" type="number" step="any" min="0" id="c-exit" inputmode="decimal" placeholder="For a P&amp;L preview">
-              </div>
-              <div>
-                <label class="lbl" for="c-lev">Leverage (1 : N)</label>
-                <input class="inp" type="number" step="any" min="1" id="c-lev" inputmode="decimal">
-              </div>
-              <div>
-                <label class="lbl" for="c-used" id="c-used-lbl">Lots used (optional)</label>
-                <input class="inp" type="number" step="any" min="0" id="c-used" inputmode="decimal" placeholder="Use recommended">
-              </div>
-              <div class="full" id="c-rate-wrap" hidden>
-                <label class="lbl" for="c-rate" id="c-rate-lbl">Conversion rate</label>
-                <input class="inp" type="number" step="any" min="0" id="c-rate" inputmode="decimal">
-              </div>
-              <div>
-                <label class="lbl" for="c-step" id="c-step-lbl">Lot step</label>
-                <select class="sel" id="c-step"><option value="0.01" selected>0.01 (micro)</option><option value="0.1">0.1</option><option value="1">1.0</option><option value="0.001">0.001</option><option value="0.0001">0.0001</option></select>
-              </div>
+              <div><label class="lbl" for="c-entry" id="c-entry-lbl">Entry price</label><input class="inp" type="number" step="any" min="0" id="c-entry" inputmode="decimal" placeholder="1.35000"></div><div><label class="lbl" for="c-stop" id="c-stop-lbl">Stop loss price</label><input class="inp" type="number" step="any" min="0" id="c-stop" inputmode="decimal" placeholder="blank = suggest one"></div>
+              <div><label class="lbl" for="c-exit" id="c-exit-lbl">Target / exit price (optional)</label><input class="inp" type="number" step="any" min="0" id="c-exit" inputmode="decimal" placeholder="For P&amp;L preview"></div>
+              <div><label class="lbl" for="c-lev" id="c-lev-lbl">Leverage 1:N (optional)</label><input class="inp" type="number" step="any" min="0" id="c-lev" inputmode="decimal" placeholder="blank = no margin limit"></div>
+              <div><label class="lbl" for="c-used" id="c-used-lbl">Your own size (optional)</label><input class="inp" type="number" step="any" min="0" id="c-used" inputmode="decimal" placeholder="blank = use recommended"></div>
+              <div><label class="lbl" for="c-step" id="c-step-lbl">Smallest size step</label><input class="inp" type="number" step="any" min="0" id="c-step" inputmode="decimal" placeholder="auto"></div>
+              <div class="full" id="c-rate-wrap" hidden><label class="lbl" for="c-rate" id="c-rate-lbl">Conversion rate</label><input class="inp" type="number" step="any" min="0" id="c-rate" inputmode="decimal"></div>
             </div>
           </div>
-          <div class="card" aria-live="polite">
-            <div class="card-title">Result</div>
-            <div id="calc-out"></div>
-          </div>
+          <div class="card" aria-live="polite"><div class="card-title">Result</div><div id="calc-out"></div></div>
         </div>
       </section>
 
       <section class="view" id="v-analytics" role="tabpanel" aria-labelledby="tab-analytics" hidden></section>
 
       <section class="view" id="v-summary" role="tabpanel" aria-labelledby="tab-summary" hidden></section>
+      <section class="view" id="v-edge" role="tabpanel" aria-labelledby="tab-edge" hidden></section>
     </div>
   </main>
 </div>
@@ -557,7 +532,7 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
 <!-- add / edit trade -->
 <dialog id="dlg-trade" aria-labelledby="dt-title">
   <form id="f-trade" novalidate>
-    <div class="dlg-h"><span id="dt-title">Add trade</span><button type="button" class="dlg-x" data-action="close-dlg" aria-label="Close">?</button></div>
+    <div class="dlg-h"><span id="dt-title">Add trade</span><button type="button" class="dlg-x" data-action="close-dlg" aria-label="Close"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="dlg-b">
       <div class="fields">
         <div>
@@ -592,7 +567,7 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
           <label class="lbl" for="f-pnl">Profit / loss</label>
           <div class="row" style="gap:6px">
             <input class="inp" type="number" step="any" id="f-pnl" inputmode="decimal" placeholder="45.50 or -20" style="flex:1">
-            <button type="button" class="btn btn-sm" data-action="calc-pnl" title="Auto-calculate from lots, entry and exit">Auto ?</button>
+            <button type="button" class="btn btn-sm" data-action="calc-pnl" title="Auto-calculate from lots, entry and exit">Auto <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3 5 14h6l-1 7 8-11h-6z"/></svg></button>
           </div>
           <div class="hint">Type it in yourself, or fill in Lots, Entry and Exit below and tap Auto.</div>
           <div class="err" id="e-pnl" hidden></div>
@@ -630,6 +605,10 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
           </details>
         </div>
         <div class="full">
+          <label class="lbl" for="f-mode">Test type</label>
+          <select class="sel" id="f-mode"><option value="backtest">Backtest</option><option value="forward">Forward test (paper)</option><option value="live">Live</option></select>
+        </div>
+        <div class="full">
           <label class="lbl" for="f-tag">Strategy</label>
           <input class="inp" id="f-tag" list="dl-tags" placeholder="Breakout, pullback…" autocomplete="off" maxlength="40">
         </div>
@@ -649,7 +628,7 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
 <!-- settings -->
 <dialog id="dlg-settings" aria-labelledby="ds-title">
   <form id="f-settings" novalidate>
-    <div class="dlg-h"><span id="ds-title">Settings</span><button type="button" class="dlg-x" data-action="close-dlg" aria-label="Close">?</button></div>
+    <div class="dlg-h"><span id="ds-title">Settings</span><button type="button" class="dlg-x" data-action="close-dlg" aria-label="Close"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="dlg-b">
       <div class="fields">
         <div>
@@ -694,7 +673,7 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
 
 <!-- help -->
 <dialog id="dlg-help" aria-labelledby="dh-title" style="width:min(640px,calc(100vw - 24px))">
-  <div class="dlg-h"><span id="dh-title">How it works</span><button type="button" class="dlg-x" data-action="close-dlg" aria-label="Close">?</button></div>
+  <div class="dlg-h"><span id="dh-title">How it works</span><button type="button" class="dlg-x" data-action="close-dlg" aria-label="Close"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <div class="dlg-b help">
     <h3>Your data</h3>
     <p>Everything stays in this browser. Nothing is uploaded. Clearing site data removes the journal, so export a CSV now and then as a backup.</p>
@@ -702,7 +681,7 @@ dialog::backdrop{background:rgba(5,5,10,.66)}
     <ul>
       <li><kbd>N</kbd> add a trade &nbsp; <kbd>/</kbd> search trades &nbsp; <kbd>1</kbd>–<kbd>5</kbd> switch section</li>
       <li><kbd>1</kbd> Dashboard &nbsp; <kbd>2</kbd> Trades &nbsp; <kbd>3</kbd> Calculator &nbsp; <kbd>4</kbd> Analytics &nbsp; <kbd>5</kbd> Summary</li>
-      <li><kbd>Ctrl</kbd>/<kbd>?</kbd> + <kbd>Enter</kbd> saves the trade form</li>
+      <li><kbd>Ctrl</kbd>/<kbd>&#8984;</kbd> + <kbd>Enter</kbd> saves the trade form</li>
     </ul>
     <h3>How numbers are worked out</h3>
     <ul>
@@ -781,8 +760,9 @@ function enrich(trades, startBalance) {
     const equity = eq;
     const ret = isNum(t.pnl) && equity > 0 ? t.pnl / equity : null;
     const rMult = isNum(t.risk) && t.risk > 0 && isNum(t.pnl) ? t.pnl / t.risk : null;
+    const move = isNum(t.entry) && t.entry > 0 && isNum(t.exit) ? (t.exit - t.entry) / t.entry * (t.side === 'long' ? 1 : -1) : null;
     eq += isNum(t.pnl) ? t.pnl : 0;
-    return Object.assign({}, t, { equity, equityAuto: !manual, ret, rMult, tradeNo: tradeNoOf(t.seq) });
+    return Object.assign({}, t, { equity, equityAuto: !manual, ret, rMult, move, tradeNo: tradeNoOf(t.seq) });
   });
 }
 
@@ -928,111 +908,76 @@ function parsePair(str) {
   const s = String(str || '').toUpperCase().replace(/[^A-Z]/g, '');
   return s.length === 6 ? { base: s.slice(0, 3), quote: s.slice(3), sym: s } : null;
 }
-const decimalsOf = step => (String(step).split('.')[1] || '').length;
-
-function calcPosition(i) {
-  const info = m => ({ ok: false, level: 'info', message: m });
+const decimalsOf = step => { const t = String(step); return t.includes('e-') ? +t.split('e-')[1] : (t.split('.')[1] || '').length; };
+const floorTo = (x, step) => +(Math.floor(x / step + 1e-9) * step).toFixed(decimalsOf(step));
+const CRYPTO_STEP = { BTC: 0.001, ETH: 0.01, SOL: 0.1, BNB: 0.01, XRP: 1, ADA: 1, DOGE: 1 };
+/* One engine for forex, gold and crypto. All money is in the account currency (USD and USDT are treated 1:1).
+   unitVal = account-currency P&L for a price move of 1.0 on one lot (forex 100,000 units, gold 100 oz) or one coin.
+   size = max loss / (stop distance x unitVal), capped by margin when leverage is entered, then rounded DOWN to the step. */
+function calcSize(i) {
+  const info = (m, suggest) => ({ ok: false, level: 'info', message: m, suggest });
   const bad = m => ({ ok: false, level: 'error', message: m });
   if (!(i.balance > 0)) return info('Enter an account balance above 0.');
   if (!(i.riskPct > 0)) return info('Enter the maximum loss per trade as a percentage above 0.');
-  if (!(i.leverage >= 1)) return info('Enter leverage of 1 or more (50 means 1:50).');
-  const pair = parsePair(i.pair);
-  if (!pair) return info('Enter a 6-letter currency pair such as USDCAD.');
-  if (!isNum(i.entry) || !isNum(i.stop)) return info('Enter an entry price and a stop loss price.');
-  if (!(i.entry > 0) || !(i.stop > 0)) return bad('Prices must be above 0.');
-  // Guard messages kept verbatim from the workbook
-  if (i.side === 'long' && !(i.entry > i.stop))
-    return bad('For a long position, entry price has to be higher than stop loss price.');
-  if (i.side === 'short' && !(i.stop > i.entry))
-    return bad('For a short position, entry price has to be lower than stop loss price.');
-
-  const acct = String(i.currency || 'USD').toUpperCase();
-  const kind = pair.quote === acct ? 'quote_is_account' : pair.base === acct ? 'base_is_account' : 'cross';
-  if (kind === 'cross' && !(i.rate > 0))
-    return info(`${pair.sym} does not include ${acct}. Enter how many ${acct} one ${pair.quote} is worth.`);
-
-  const pipSize = pair.quote === 'JPY' ? 0.01 : 0.0001;
-  const contract = 100000;
-  const dist = Math.abs(i.entry - i.stop);
-  const q2a = kind === 'quote_is_account' ? 1 : kind === 'base_is_account' ? 1 / i.entry : i.rate;
-  const baseToAccount = kind === 'quote_is_account' ? i.entry : kind === 'base_is_account' ? 1 : i.rate * i.entry;
-
-  const riskAmount = i.balance * (i.riskPct / 100);
-  const lossPerUnit = dist * q2a;
-  const units = riskAmount / lossPerUnit;
-  const lotsExact = units / contract;
-  const step = i.lotStep > 0 ? i.lotStep : 0.01;
-  const dp = decimalsOf(step);
-  const lotsRounded = Number((Math.floor(lotsExact / step + 1e-9) * step).toFixed(dp));
-  const custom = isNum(i.lotsUsed) && i.lotsUsed > 0;
-  const lotsUsed = custom ? i.lotsUsed : lotsRounded;
-
-  const riskAtUsed = lotsUsed * contract * lossPerUnit;
-  const notional = lotsUsed * contract * baseToAccount;
-  const margin = notional / i.leverage;
-  const pipValueLot = contract * pipSize * q2a;
-  const previewPnl = isNum(i.exit) ? (i.exit - i.entry) * contract * lotsUsed * q2a * (i.side === 'long' ? 1 : -1) : null;
-
-  const warnings = [];
-  if (lotsRounded === 0) warnings.push(`At this stop distance even ${step} lots risks more than your maximum loss.`);
-  if (riskAtUsed > riskAmount * 1.0001) warnings.push('Risk at the size used is above your maximum loss per trade.');
-  if (margin > i.balance) warnings.push('Required margin is larger than the account balance.');
-
-  return {
-    ok: true, kind, pair, pipSize, contract, acct,
-    riskAmount, dist, pips: dist / pipSize,
-    lotsExact, lotsRounded, lotsUsed, custom, step, dp,
-    riskAtUsed, notional, margin, previewPnl,
-    pipValueLot, pipValueUsed: pipValueLot * lotsUsed,
-    warnings,
-  };
-}
-
-/* ---------- crypto position sizing (v2) ----------
-   Assumes the quote currency of the symbol (e.g. the USDT in BTCUSDT) is the
-   account currency, which covers the large majority of crypto trading — no
-   pips, no fixed 100,000-unit contract, sized directly in coins/units. */
-function calcPositionCrypto(i) {
-  const info = m => ({ ok: false, level: 'info', message: m });
-  const bad = m => ({ ok: false, level: 'error', message: m });
-  if (!(i.balance > 0)) return info('Enter an account balance above 0.');
-  if (!(i.riskPct > 0)) return info('Enter the maximum loss per trade as a percentage above 0.');
-  const sym = String(i.pair || '').toUpperCase().trim();
-  if (!sym) return info('Enter a symbol, such as BTCUSDT.');
-  if (!isNum(i.entry) || !isNum(i.stop)) return info('Enter an entry price and a stop loss price.');
-  if (!(i.entry > 0) || !(i.stop > 0)) return bad('Prices must be above 0.');
-  if (i.side === 'long' && !(i.entry > i.stop))
-    return bad('For a long position, entry price has to be higher than stop loss price.');
-  if (i.side === 'short' && !(i.stop > i.entry))
-    return bad('For a short position, entry price has to be lower than stop loss price.');
-  const leverage = i.leverage >= 1 ? i.leverage : 1;
-
-  const riskAmount = i.balance * (i.riskPct / 100);
-  const dist = Math.abs(i.entry - i.stop);
-  const qtyExact = riskAmount / dist;
-  const step = i.lotStep > 0 ? i.lotStep : 0.0001;
-  const dp = decimalsOf(step);
-  const qtyRounded = Number((Math.floor(qtyExact / step + 1e-9) * step).toFixed(dp));
-  const custom = isNum(i.lotsUsed) && i.lotsUsed > 0;
-  const qtyUsed = custom ? i.lotsUsed : qtyRounded;
-
-  const riskAtUsed = qtyUsed * dist;
-  const notional = qtyUsed * i.entry;
-  const margin = notional / leverage;
-  const previewPnl = isNum(i.exit) ? (i.exit - i.entry) * qtyUsed * (i.side === 'long' ? 1 : -1) : null;
-
-  const warnings = [];
-  if (qtyRounded === 0) warnings.push(`At this stop distance even ${step} units risks more than your maximum loss.`);
-  if (riskAtUsed > riskAmount * 1.0001) warnings.push('Risk at the size used is above your maximum loss per trade.');
-  if (margin > i.balance) warnings.push('Required margin is larger than the account balance.');
-
-  return {
-    ok: true, kind: 'crypto', sym, acct: String(i.currency || 'USD').toUpperCase(),
-    riskAmount, dist, leverage,
-    qtyExact, qtyRounded, qtyUsed, custom, step, dp,
-    riskAtUsed, notional, margin, previewPnl,
-    warnings,
-  };
+  if (!isNum(i.entry) || !(i.entry > 0)) return info('Enter an entry price.');
+  const long = i.side === 'long', sign = long ? 1 : -1;
+  const sym = String(i.pair || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  let contract = 1, q2a = 1, b2a = i.entry, kind = i.type, pipSize = null, unit = 'coins';
+  if (i.type === 'forex') {
+    const p = parsePair(i.pair);
+    if (!p) return info('Enter a 6-letter currency pair such as USDCAD.');
+    const k = p.quote === 'USD' ? 'quote' : p.base === 'USD' ? 'base' : 'cross';
+    if (k === 'cross' && !(i.rate > 0)) return info(`${p.sym} does not include USD. Enter how many USD one ${p.quote} is worth.`);
+    contract = 100000; unit = 'lots'; pipSize = p.quote === 'JPY' ? 0.01 : 0.0001;
+    q2a = k === 'quote' ? 1 : k === 'base' ? 1 / i.entry : i.rate;
+    b2a = k === 'quote' ? i.entry : k === 'base' ? 1 : i.rate * i.entry;
+  } else if (i.type === 'gold') { contract = 100; unit = 'lots'; pipSize = 0.1; }
+  else if (!sym) return info('Enter a symbol, such as BTCUSDT.');
+  const unitVal = contract * q2a, riskAmt = i.balance * i.riskPct / 100;
+  const step = i.step > 0 ? i.step : (i.type === 'crypto' ? 0.001 : 0.01);
+  const own = isNum(i.used) && i.used > 0 ? i.used : null;
+  const stopFor = size => { const d = riskAmt / (size * unitVal); const st = long ? i.entry - d : i.entry + d; return st > 0 ? +st.toPrecision(7) : null; };
+  const notes = [];
+  let stop = i.stop, suggest;
+  if (!isNum(stop) || !(stop > 0) || stop === i.entry) {
+    if (!own) return info('Enter a stop loss price, or enter your own size and I will suggest the stop that matches your risk.');
+    const st = stopFor(own);
+    return info(st ? `With ${own} ${unit} and a max loss of ${riskAmt.toFixed(2)}, your stop would need to be at ${st}.` : 'That size is too small for this risk setup; stop would fall below 0.', st ? { stop: st, why: 'exactly your max loss at your size' } : undefined);
+  }
+  if ((long && stop > i.entry) || (!long && stop < i.entry)) {
+    stop = long ? i.entry - Math.abs(i.entry - stop) : i.entry + Math.abs(i.entry - stop);
+    if (!(stop > 0)) return bad('Stop would fall below 0. Check your entry and stop.');
+    stop = +stop.toPrecision(7);
+    notes.push(`Your stop was on the wrong side for a ${i.side}. I mirrored it to ${stop} so the sizing works.`);
+    suggest = { stop, why: `valid stop for a ${i.side}, same distance` };
+  }
+  const dist = Math.abs(i.entry - stop), pips = pipSize ? dist / pipSize : null;
+  const riskSize = riskAmt / (dist * unitVal), notionalPer = contract * b2a;
+  const lev = i.leverage >= 1 ? i.leverage : null;
+  const marginSize = lev ? i.balance * lev / notionalPer : Infinity;
+  const limit = marginSize < riskSize ? 'margin' : 'risk';
+  const exact = Math.min(riskSize, marginSize), rec = floorTo(exact, step);
+  const used = own || rec, custom = !!own;
+  const riskUsed = used * dist * unitVal, notional = used * notionalPer, margin = lev ? notional / lev : null;
+  const levNeeded = notional / i.balance;
+  const pnlPer = isNum(i.exit) ? (i.exit - i.entry) * sign : null;
+  const preview = pnlPer === null ? null : pnlPer * used * unitVal;
+  const warnings = [...notes];
+  if (rec === 0) {
+    const st = limit === 'risk' ? stopFor(step) : null;
+    warnings.push(limit === 'margin' ? `At 1:${lev} leverage even ${step} ${unit} needs more margin than your balance.` : `At this stop distance even the smallest step (${step} ${unit}) risks more than your max loss.`);
+    if (st && !suggest) suggest = { stop: st, why: `the closest stop where ${step} ${unit} fits your risk` };
+  }
+  if (limit === 'margin' && rec > 0) warnings.push(`Size is limited by leverage 1:${lev}, not by risk. Your real loss at the stop is only ${(riskUsed / i.balance * 100).toFixed(2)}% of balance.`);
+  if (riskUsed > riskAmt * 1.0001) {
+    warnings.push(`Your size risks ${(riskUsed / i.balance * 100).toFixed(2)}% of balance, above your ${i.riskPct}% limit.`);
+    const st = stopFor(used); if (st && !suggest) suggest = { stop: st, why: 'keeps your own size inside your max loss' };
+  }
+  if (margin !== null && margin > i.balance * 1.0001) warnings.push('Required margin is larger than the account balance.');
+  if (i.type === 'crypto' && !/(USDT|USDC|BUSD|USD)$/.test(sym)) warnings.push('Symbol does not end in USD/USDT, so results assume the quote is USD.');
+  return { ok: true, kind, unit, sym, riskAmt, dist, pips, stop, riskSize, marginSize, limit, exact, rec, used, custom, step, dp: decimalsOf(step),
+    riskUsed, riskPctUsed: riskUsed / i.balance, notional, margin, levNeeded, lev, preview, previewPct: preview === null ? null : preview / i.balance,
+    rr: pnlPer === null ? null : pnlPer / dist, pipValueLot: pipSize ? contract * pipSize * q2a : null, warnings, suggest };
 }
 
 /* ==========================================================================
@@ -1266,12 +1211,13 @@ const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 
 
 /* ---------- persistence ---------- */
 const numOrNull = v => (isNum(v) ? v : null);
+const MODE_LBL = { backtest: 'BACKTEST', forward: 'FORWARD', live: 'LIVE' }, MODE_CLS = { backtest: 'b-bt', forward: 'b-fw', live: 'b-lv' };
 function normTrade(t) {
   return {
     id: t.id || uid(), seq: isNum(t.seq) ? t.seq : 0, date: t.date, side: t.side, pnl: t.pnl,
     accountSize: isNum(t.accountSize) && t.accountSize > 0 ? t.accountSize : null,
     pair: String(t.pair || '').toUpperCase().replace(/[^A-Z0-9/]/g, ''),
-    assetType: t.assetType === 'crypto' ? 'crypto' : 'forex',
+    assetType: t.assetType === 'crypto' ? 'crypto' : 'forex', mode: MODE_LBL[t.mode] ? t.mode : 'backtest',
     timeframe: String(t.timeframe || '').trim().slice(0, 20),
     lots: numOrNull(t.lots), entry: numOrNull(t.entry), exit: numOrNull(t.exit), stop: numOrNull(t.stop), risk: numOrNull(t.risk),
     screenshotBefore: !!t.screenshotBefore, screenshotAfter: !!t.screenshotAfter,
@@ -1364,7 +1310,7 @@ function tradeToRow(t, uid) {
     account_size: t.accountSize, pair: t.pair, asset_type: t.assetType, timeframe: t.timeframe,
     lots: t.lots, entry: t.entry, exit: t.exit, stop: t.stop, risk: t.risk,
     screenshot_before: t.screenshotBefore, screenshot_after: t.screenshotAfter,
-    tag: t.tag, notes: t.notes,
+    tag: t.tag, notes: '[#' + (t.mode || 'backtest') + '] ' + (t.notes || ''),
   };
 }
 function rowToTrade(r) {
@@ -1372,7 +1318,8 @@ function rowToTrade(r) {
     id: r.id, seq: r.seq, date: r.date, side: r.side, pnl: r.pnl, accountSize: r.account_size,
     pair: r.pair, assetType: r.asset_type, timeframe: r.timeframe, lots: r.lots, entry: r.entry,
     exit: r.exit, stop: r.stop, risk: r.risk, screenshotBefore: r.screenshot_before, screenshotAfter: r.screenshot_after,
-    tag: r.tag, notes: r.notes,
+    tag: r.tag, notes: String(r.notes || '').replace(/^\[#(backtest|forward|live)\] ?/, ''),
+    mode: (String(r.notes || '').match(/^\[#(backtest|forward|live)\]/) || [])[1],
   });
 }
 function setCloudStatus(status, extra) {
@@ -1688,7 +1635,7 @@ const kpi = (label, val, sub, strip, cls = '', title = '') =>
 function emptyJournal() {
   return `<div class="card"><div class="empty"><h2>Your journal is empty</h2>
     <p>Log your first trade to see returns, drawdown and win rate here. Or load ten sample trades to look around first.</p>
-    <div class="row"><button class="btn btn-blue" data-action="add">+ Add trade</button><button class="btn" data-action="sample">Load sample</button><button class="btn" data-action="import">? Import CSV</button></div></div></div>`;
+    <div class="row"><button class="btn btn-blue" data-action="add">+ Add trade</button><button class="btn" data-action="sample">Load sample</button><button class="btn" data-action="import"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V9m-4 4 4-4 4 4M5 4h14"/></svg> Import CSV</button></div></div></div>`;
 }
 function emptyView() {
   return `<div class="card"><div class="empty"><h2>No trades in this view</h2><p>Nothing matches the current scope and date range.</p>
@@ -1712,19 +1659,13 @@ function renderDash() {
       kpi('Payoff ratio', fmtNum(S.payoff), S.payoff === null ? 'Needs a win and a loss' : `Avg win ${fmtPct(S.avgWin)} / loss ${fmtPct(Math.abs(S.avgLoss))}`, 'purple', '', 'Average winning return ÷ average losing return'),
       kpi('Profit factor', fmtNum(S.profitFactor), S.profitFactor === null ? 'No losing trades yet' : `${fmtMoney(S.grossProfit)} won / ${fmtMoney(S.grossLoss)} lost`, 'cyan', '', 'Gross profit ÷ gross loss'),
       kpi('Expectancy', fmtMoney(S.expectancy, true), 'average per trade', 'amber', sgnCls(S.expectancy)),
-      kpi('Max drawdown', dd.maxDd < 0 ? fmtPct(dd.maxDd) : '0.00%', dd.maxDd < 0 ? `${fmtMoney(dd.peak)} ? ${fmtMoney(dd.trough)}` : 'No drawdown', 'red', dd.maxDd < 0 ? 'neg' : '', 'Biggest fall from a balance peak'),
+      kpi('Max drawdown', dd.maxDd < 0 ? fmtPct(dd.maxDd) : '0.00%', dd.maxDd < 0 ? `${fmtMoney(dd.peak)} \u2192 ${fmtMoney(dd.trough)}` : 'No drawdown', 'red', dd.maxDd < 0 ? 'neg' : '', 'Biggest fall from a balance peak'),
       kpi('Sharpe ratio', fmtNum(sh.sharpe), `${st.periods}/yr · ${st.sharpeMode === 'active' ? 'active days' : 'all days'}`, 'accent', '', sh.sharpe === null ? 'Needs at least 2 days with varying returns' : 'Average daily return ÷ standard deviation, annualised'),
     ];
     const curve = state.ui.curve;
     const latest = D.view.slice().reverse().slice(0, 6);
     el.innerHTML = `
       <div class="grid kpis">${cards.join('')}</div>
-      <div class="card" style="margin-bottom:10px">
-        <div class="card-title">P&amp;L calendar</div>
-        <div class="card-sub">Net P&amp;L per day, rounded. Select a day to open its trades.</div>
-        <div class="heat-wrap" id="heat"></div>
-        <div class="heat-legend">Loss <span class="hc l3"></span><span class="hc l2"></span><span class="hc l1"></span><span class="hc z"></span><span class="hc p1"></span><span class="hc p2"></span><span class="hc p3"></span> Profit</div>
-      </div>
       <div class="grid g2">
         <div class="card"><div class="card-title">Outcomes</div>
           <div class="donut-wrap">${donut([
@@ -1963,9 +1904,9 @@ function strategyTable() {
 }
 
 /* ---------- Trades ---------- */
-const COLS = [['tradeNo', '#', 'r'], ['date', 'Date'], ['assetType', 'Market'], ['pair', 'Pair'], ['side', 'Side'], ['timeframe', 'TF'],
+const COLS = [['tradeNo', '#', 'r'], ['date', 'Date'], ['assetType', 'Market'], ['mode', 'Type'], ['pair', 'Pair'], ['side', 'Side'], ['timeframe', 'TF'],
   ['lots', 'Lots', 'r'], ['entry', 'Entry', 'r'], ['exit', 'Exit', 'r'],
-  ['pnl', 'P&L', 'r'], ['equity', 'Account', 'r'], ['ret', 'Return', 'r'], ['rMult', 'R', 'r'],
+  ['pnl', 'P&L', 'r'], ['equity', 'Account', 'r'], ['ret', 'Acct %', 'r'], ['move', 'Move %', 'r'], ['rMult', 'R', 'r'],
   ['screenshotBefore', 'SS Before'], ['screenshotAfter', 'SS After'], ['tag', 'Strategy'], ['notes', 'Notes']];
 function fillSelect(sel, opts, cur) {
   sel.innerHTML = opts.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('');
@@ -1975,7 +1916,8 @@ function fillSelect(sel, opts, cur) {
 function filteredTrades() {
   const u = state.ui;
   let list = D.view;
-  if (u.tq) { const q = u.tq.toLowerCase(); list = list.filter(t => [t.date, t.pair, t.tag, t.notes, t.side, t.timeframe].join(' ').toLowerCase().includes(q)); }
+  if (u.tq) { const q = u.tq.toLowerCase(); list = list.filter(t => [t.date, t.pair, t.tag, t.notes, t.side, t.timeframe, t.mode].join(' ').toLowerCase().includes(q)); }
+  if (u.tmode) list = list.filter(t => t.mode === u.tmode);
   if (u.tasset) list = list.filter(t => t.assetType === u.tasset);
   if (u.tpair) list = list.filter(t => (u.tpair === '__none__' ? !t.pair : t.pair === u.tpair));
   if (u.ttag) list = list.filter(t => (u.ttag === '__none__' ? !t.tag : t.tag === u.ttag));
@@ -1997,6 +1939,7 @@ function tradeRow(t) {
   const ssBadge = v => `<span class="badge ${v ? 'b-yes' : 'b-no'}">${v ? 'YES' : 'NO'}</span>`;
   return `<tr><td class="r dim">${t.tradeNo}</td><td>${t.date}</td>
     <td><span class="badge ${t.assetType === 'crypto' ? 'b-crypto' : 'b-forex'}">${t.assetType === 'crypto' ? 'CRYPTO' : 'FOREX'}</span></td>
+    <td><span class="badge ${MODE_CLS[t.mode]}">${MODE_LBL[t.mode]}</span></td>
     <td class="pair">${esc(t.pair) || '<span class="faint">—</span>'}</td>
     <td><span class="badge ${t.side === 'long' ? 'b-long' : 'b-short'}">${t.side === 'long' ? 'LONG' : 'SHORT'}</span></td>
     <td>${esc(t.timeframe) || '<span class="faint">—</span>'}</td>
@@ -2004,6 +1947,7 @@ function tradeRow(t) {
     <td class="r ${sgnCls(t.pnl)}"><b>${fmtMoney(t.pnl, true)}</b></td>
     <td class="r">${fmtMoney(t.equity)}${t.equityAuto ? '' : '<span class="manual" title="Account size entered manually">M</span>'}</td>
     <td class="r ${sgnCls(t.ret)}">${fmtPct(t.ret, 2, true)}</td>
+    <td class="r ${sgnCls(t.move)}" title="Price move from entry to exit, in your trade direction"><b>${fmtPct(t.move, 2, true)}</b></td>
     <td class="r ${sgnCls(t.rMult)}">${isNum(t.rMult) ? fmtNum(t.rMult) + 'R' : '—'}</td>
     <td>${ssBadge(t.screenshotBefore)}</td><td>${ssBadge(t.screenshotAfter)}</td>
     <td>${esc(t.tag) || '<span class="faint">—</span>'}</td><td class="ellip" title="${esc(t.notes)}">${esc(t.notes)}</td>
@@ -2016,9 +1960,9 @@ function renderTrades() {
   u.tpair = fillSelect($('#t-pair'), [['', 'All pairs'], ...pairs.map(p => [p, p]), ...(D.all.some(t => !t.pair) ? [['__none__', 'No pair']] : [])], u.tpair);
   u.ttag = fillSelect($('#t-tag'), [['', 'All strategies'], ...tags.map(p => [p, p]), ...(D.all.some(t => !t.tag) ? [['__none__', 'No strategy']] : [])], u.ttag);
   $('#t-out').value = u.tout;
-  $('#t-asset').value = u.tasset;
+  $('#t-asset').value = u.tasset; $('#t-mode').value = u.tmode || '';
   $('#t-head').innerHTML = '<tr>' + COLS.map(([k, l, c]) =>
-    `<th class="${c || ''}" aria-sort="${u.sort.key === k ? (u.sort.dir > 0 ? 'ascending' : 'descending') : 'none'}"><button class="th" data-sort="${k}">${l === 'P&L' ? 'P&amp;L' : l}${u.sort.key === k ? (u.sort.dir > 0 ? ' ?' : ' ?') : ''}</button></th>`).join('') +
+    `<th class="${c || ''}" aria-sort="${u.sort.key === k ? (u.sort.dir > 0 ? 'ascending' : 'descending') : 'none'}"><button class="th" data-sort="${k}">${l === 'P&L' ? 'P&amp;L' : l}${u.sort.key === k ? (u.sort.dir > 0 ? ' \u25B2' : ' \u25BC') : ''}</button></th>`).join('') +
     '<th><span class="th"><span class="sr">Actions</span></span></th></tr>';
   const list = filteredTrades();
   const per = u.per, pages = per ? Math.max(1, Math.ceil(list.length / per)) : 1;
@@ -2026,12 +1970,12 @@ function renderTrades() {
   const slice = per ? list.slice((u.page - 1) * per, u.page * per) : list;
   const body = $('#t-body');
   if (!D.all.length) {
-    body.innerHTML = `<tr><td colspan="${COLS.length + 1}"><div class="empty"><h2>No trades yet</h2><p>Add a trade, import a CSV, or load the sample journal.</p><div class="row"><button class="btn btn-blue" data-action="add">+ Add trade</button><button class="btn" data-action="import">? Import CSV</button><button class="btn" data-action="sample">Load sample</button></div></div></td></tr>`;
+    body.innerHTML = `<tr><td colspan="${COLS.length + 1}"><div class="empty"><h2>No trades yet</h2><p>Add a trade, import a CSV, or load the sample journal.</p><div class="row"><button class="btn btn-blue" data-action="add">+ Add trade</button><button class="btn" data-action="import"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V9m-4 4 4-4 4 4M5 4h14"/></svg> Import CSV</button><button class="btn" data-action="sample">Load sample</button></div></div></td></tr>`;
   } else if (!list.length) {
     body.innerHTML = `<tr><td colspan="${COLS.length + 1}"><div class="empty"><h2>No trades match</h2><p>Try a different search or clear the filters.</p><button class="btn btn-blue" data-action="clear-tfilters">Clear filters</button></div></td></tr>`;
   } else body.innerHTML = slice.map(tradeRow).join('');
   $('#t-count').textContent = D.all.length ? `Showing ${list.length} of ${D.all.length} trades` : 'No trades';
-  $('#t-chips').innerHTML = u.tday ? `<span class="fchip">Day ${u.tday}<button data-action="clear-day" aria-label="Remove day filter">?</button></span>` : '';
+  $('#t-chips').innerHTML = u.tday ? `<span class="fchip">Day ${u.tday}<button data-action="clear-day" aria-label="Remove day filter"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></span>` : '';
   $('#t-pager').hidden = pages <= 1;
   $('#t-pg').textContent = `${u.page} / ${pages}`;
   $('#t-q').value = u.tq;
@@ -2041,94 +1985,109 @@ function renderTrades() {
 /* ---------- Calculator ---------- */
 function calcInputs() {
   const g = id => $('#' + id).valueAsNumber;
-  return {
-    type: $('input[name=c-type]:checked').value,
-    pair: $('#c-pair').value, side: $('input[name=c-side]:checked').value, balance: g('c-bal'), riskPct: g('c-risk'), leverage: g('c-lev'),
-    entry: g('c-entry'), stop: g('c-stop'), exit: g('c-exit'), lotsUsed: g('c-used'), rate: g('c-rate'), lotStep: +$('#c-step').value, currency: state.settings.currency,
-  };
+  return { type: $('input[name=c-type]:checked').value, cur: $('input[name=c-cur]:checked').value, pair: $('#c-pair').value,
+    side: $('input[name=c-side]:checked').value, balance: g('c-bal'), riskPct: g('c-risk'), leverage: g('c-lev'), entry: g('c-entry'),
+    stop: g('c-stop'), exit: g('c-exit'), used: g('c-used'), rate: g('c-rate'), step: g('c-step') };
 }
 function renderCalc() {
-  if (!state.ui.calcReady) {
-    $('#c-bal').value = +D.balance.toFixed(2);
-    $('#c-risk').value = state.settings.riskPct;
-    $('#c-lev').value = state.settings.leverage;
-    state.ui.calcReady = true;
-  }
-  syncCalcLabels();
+  if (!state.ui.calcReady) { $('#c-bal').value = +D.balance.toFixed(2); $('#c-risk').value = state.settings.riskPct; state.ui.calcReady = true; }
   updateCalc();
 }
 function syncCalcLabels() {
-  const crypto = $('input[name=c-type]:checked').value === 'crypto';
-  $('#c-pair-lbl').textContent = crypto ? 'Crypto symbol' : 'Currency pair';
-  $('#c-pair').setAttribute('list', crypto ? 'dl-crypto' : 'dl-majors');
-  $('#c-pair').placeholder = crypto ? 'BTCUSDT' : '';
-  if (crypto && /^[A-Z]{6}$/.test($('#c-pair').value)) $('#c-pair').value = 'BTCUSDT';
-  if (!crypto && $('#c-pair').value.toUpperCase().endsWith('USDT')) $('#c-pair').value = 'USDCAD';
-  $('#c-used-lbl').textContent = crypto ? 'Quantity used (optional)' : 'Lots used (optional)';
-  $('#c-step-lbl').textContent = crypto ? 'Quantity step' : 'Lot step';
-  $('#c-rate-wrap').hidden = crypto || $('#c-rate-wrap').hidden;
+  const type = $('input[name=c-type]:checked').value, pe = $('#c-pair'), v = pe.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (pe.dataset.type !== type) {
+    pe.dataset.type = type;
+    pe.value = type === 'gold' ? 'XAUUSD' : type === 'crypto' ? (v.length > 6 && !v.startsWith('XAU') ? v : 'BTCUSDT') : (!v || /^XAU|USDT$/.test(v) ? 'USDCAD' : v);
+  }
+  pe.setAttribute('list', type === 'crypto' ? 'dl-crypto' : 'dl-majors');
+  $('#c-pair-lbl').textContent = type === 'crypto' ? 'Crypto symbol' : type === 'gold' ? 'Gold symbol' : 'Currency pair';
+  const unit = type === 'crypto' ? 'coins' : 'lots';
+  $('#c-used-lbl').textContent = `Your own size in ${unit} (optional)`;
+  $('#c-step-lbl').textContent = `Smallest size step (${unit})`;
+  const st = $('#c-step'), key = type + '|' + pe.value.toUpperCase();
+  if (st.dataset.key !== key) { st.dataset.key = key; st.dataset.auto = '1'; }
+  if (st.dataset.auto === '1') st.value = type === 'crypto' ? (CRYPTO_STEP[pe.value.toUpperCase().replace(/(USDT|USDC|BUSD|USD)$/, '')] || 0.001) : 0.01;
 }
 function updateCalc() {
-  const i = calcInputs(), cur = state.settings.currency;
-  const hint = $('#c-pair-hint'), rateWrap = $('#c-rate-wrap');
-  let r;
-  if (i.type === 'crypto') {
-    rateWrap.hidden = true;
-    hint.textContent = i.pair ? `${i.pair.toUpperCase()}: assumes the quote asset (the USDT/USD part) is your account currency (${cur}).` : 'A symbol such as BTCUSDT.';
-    r = calcPositionCrypto(i);
-  } else {
-    const pr = parsePair(i.pair);
-    if (!pr) { hint.textContent = 'Six letters, for example EURUSD.'; rateWrap.hidden = true; }
+  syncCalcLabels();
+  const i = calcInputs(), lab = i.cur, hint = $('#c-pair-hint'), rw = $('#c-rate-wrap');
+  const money = (v, sg) => (v < 0 ? '\u2212' : sg && v > 0 ? '+' : '') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + lab;
+  const px = v => String(+v.toPrecision(7)), nf = v => String(+v.toFixed(5));
+  rw.hidden = true;
+  if (i.type === 'forex') {
+    const p = parsePair(i.pair);
+    if (!p) hint.textContent = 'Six letters, for example EURUSD.';
     else {
-      const kind = pr.quote === cur ? `the quote currency is your account currency (${cur})` : pr.base === cur ? `the base currency is your account currency (${cur})` : `a cross pair, so it needs a ${cur} rate`;
-      hint.textContent = `${pr.sym}: ${kind}. Pip size ${pr.quote === 'JPY' ? '0.01' : '0.0001'}, 1 lot = 100,000 units.`;
-      const cross = pr.quote !== cur && pr.base !== cur;
-      rateWrap.hidden = !cross;
-      if (cross) $('#c-rate-lbl').textContent = `1 ${pr.quote} is worth how many ${cur}?`;
+      const cross = p.quote !== 'USD' && p.base !== 'USD';
+      rw.hidden = !cross; if (cross) $('#c-rate-lbl').textContent = `1 ${p.quote} is worth how many USD?`;
+      hint.textContent = `${p.sym}: 1 lot = 100,000 units, pip ${p.quote === 'JPY' ? '0.01' : '0.0001'}. ${lab} and USD are treated as equal.`;
     }
-    r = calcPosition(i);
-  }
+  } else hint.textContent = i.type === 'gold' ? 'Gold: 1 lot = 100 oz, so a $1 move = $100 per lot.' : 'Size is in coins. USD and USDT are treated as equal.';
   $('#c-bal-hint').innerHTML = `Journal balance ${esc(fmtMoney(D.balance))} <button class="btn btn-sm" data-action="calc-balance" type="button">Use it</button>`;
-  const out = $('#calc-out');
-  if (!r.ok) { out.innerHTML = `<div class="note ${r.level === 'error' ? 'error' : ''}">${esc(r.message)}</div>`; return; }
-  const nf = v => String(+v.toFixed(4));
-  const previewRow = isNum(r.previewPnl)
-    ? `<div><dt>Estimated P&amp;L at exit</dt><dd class="${sgnCls(r.previewPnl)}">${fmtMoney(r.previewPnl, true)}</dd><small>At the size used, entry to exit</small></div>` : '';
-  if (r.kind === 'crypto') {
-    out.innerHTML = `
-      <div class="lbl">Recommended size</div>
-      <div><span class="hero-num">${r.qtyRounded.toFixed(r.dp)}</span><span class="hero-unit">units</span></div>
-      <p class="hint">Exact size is ${nf(r.qtyExact)} units. Rounded down to the ${r.step} step so a stop-out never costs more than ${esc(fmtMoney(r.riskAmount))}.</p>
-      <dl class="kv">
-        <div><dt>Max loss</dt><dd>${fmtMoney(r.riskAmount)}</dd><small>${i.riskPct}% of ${fmtMoney(i.balance)}</small></div>
-        <div><dt>Stop distance</dt><dd>${nf(r.dist)}</dd><small>in price</small></div>
-        <div><dt>Quantity used</dt><dd>${nf(r.qtyUsed)}</dd><small>${r.custom ? 'Your size' : 'Recommended size'}</small></div>
-        <div><dt>Loss if stopped out</dt><dd class="neg">${fmtMoney(-r.riskAtUsed)}</dd><small>At the quantity used</small></div>
-        <div><dt>Position value</dt><dd>${fmtMoney(r.notional)}</dd><small>In ${cur}</small></div>
-        <div><dt>Margin required</dt><dd>${fmtMoney(r.margin)}</dd><small>At 1:${r.leverage}, in ${cur}</small></div>
-        ${previewRow}
-      </dl>
-      ${r.warnings.map(w => `<div class="note warn" style="margin-top:10px">${esc(w)}</div>`).join('')}
-      <div class="row" style="margin-top:14px"><button class="btn btn-blue" data-action="calc-log" type="button">Log this trade</button></div>`;
-  } else {
-    out.innerHTML = `
-      <div class="lbl">Recommended size</div>
-      <div><span class="hero-num">${r.lotsRounded.toFixed(r.dp)}</span><span class="hero-unit">lots</span></div>
-      <p class="hint">Exact size is ${nf(r.lotsExact)} lots. It is rounded down to the ${r.step} step so a stop-out never costs more than ${esc(fmtMoney(r.riskAmount))}.</p>
-      <dl class="kv">
-        <div><dt>Max loss</dt><dd>${fmtMoney(r.riskAmount)}</dd><small>${i.riskPct}% of ${fmtMoney(i.balance)}</small></div>
-        <div><dt>Stop distance</dt><dd>${r.pips.toFixed(1)} pips</dd><small>${nf(r.dist)} in price</small></div>
-        <div><dt>Lots used</dt><dd>${nf(r.lotsUsed)}</dd><small>${r.custom ? 'Your size' : 'Recommended size'}</small></div>
-        <div><dt>Loss if stopped out</dt><dd class="neg">${fmtMoney(-r.riskAtUsed)}</dd><small>At the lots used</small></div>
-        <div><dt>Position value</dt><dd>${fmtMoney(r.notional)}</dd><small>In ${cur}</small></div>
-        <div><dt>Margin required</dt><dd>${fmtMoney(r.margin)}</dd><small>At 1:${i.leverage}, in ${cur}</small></div>
-        <div><dt>Pip value per lot</dt><dd>${fmtMoney(r.pipValueLot)}</dd><small>In ${cur}</small></div>
-        <div><dt>Pip value at lots used</dt><dd>${fmtMoney(r.pipValueUsed)}</dd><small>In ${cur}</small></div>
-        ${previewRow}
-      </dl>
-      ${r.warnings.map(w => `<div class="note warn" style="margin-top:10px">${esc(w)}</div>`).join('')}
-      <div class="row" style="margin-top:14px"><button class="btn btn-blue" data-action="calc-log" type="button">Log this trade</button></div>`;
-  }
+  const r = calcSize(i), out = $('#calc-out');
+  const sug = s => s ? `<div class="note" style="margin-top:10px">Suggested stop: <b>${px(s.stop)}</b> (${esc(s.why)}) <button class="btn btn-sm" data-action="calc-usestop" data-stop="${s.stop}" type="button">Use this stop</button></div>` : '';
+  if (!r.ok) { out.innerHTML = `<div class="note ${r.level === 'error' ? 'error' : ''}">${esc(r.message)}</div>${sug(r.suggest)}`; return; }
+  const u = r.unit, row = (t, v, sm, c) => `<div><dt>${t}</dt><dd${c ? ` class="${c}"` : ''}>${v}</dd><small>${sm}</small></div>`;
+  out.innerHTML = `
+    <div class="lbl">Recommended size</div>
+    <div><span class="hero-num">${r.rec.toFixed(r.dp)}</span><span class="hero-unit">${u}</span></div>
+    <p class="hint">Exact: ${nf(r.exact)} ${u}, rounded down to the ${r.step} step so a stop-out never costs more than ${money(r.riskAmt)}. Limited by <b>${r.limit}</b>.</p>
+    <dl class="kv">
+      ${row('Max loss', money(r.riskAmt), `${i.riskPct}% of ${money(i.balance)}`)}
+      ${row('Stop distance', r.pips !== null ? r.pips.toFixed(1) + (i.type === 'gold' ? ' points' : ' pips') : px(r.dist), `${px(r.dist)} in price \u00B7 stop ${px(r.stop)}`)}
+      ${row('Size used', r.used.toFixed(r.dp) + ' ' + u, r.custom ? 'Your own size' : 'Recommended size')}
+      ${row('Loss if stopped out', money(-r.riskUsed), `${(r.riskPctUsed * 100).toFixed(2)}% of balance`, 'neg')}
+      ${row('Position value', money(r.notional), 'Full exposure')}
+      ${r.margin !== null ? row('Margin required', money(r.margin), `At 1:${r.lev}`) : row('Leverage needed', '1:' + Math.max(1, Math.ceil(r.levNeeded * 100) / 100), 'No leverage entered, so no margin limit')}
+      ${r.pipValueLot ? row('Pip value per lot', money(r.pipValueLot), '') : ''}
+      ${r.preview !== null ? row('P&amp;L at target', money(r.preview, true), `${(r.previewPct * 100).toFixed(2)}% of balance \u00B7 ${r.rr.toFixed(2)}R`, sgnCls(r.preview)) : ''}
+    </dl>
+    ${r.warnings.map(w => `<div class="note warn" style="margin-top:10px">${esc(w)}</div>`).join('')}${sug(r.suggest)}
+    <div class="row" style="margin-top:14px"><button class="btn btn-blue" data-action="calc-log" type="button">Log this trade</button></div>`;
+}
+
+/* ---------- Edge ---------- */
+function statsFor(ts) {
+  const n = ts.length; if (!n) return null;
+  const w = ts.filter(t => t.pnl > 0), l = ts.filter(t => t.pnl < 0), gp = sum(w.map(t => t.pnl)), gl = Math.abs(sum(l.map(t => t.pnl)));
+  const rs = ts.map(t => t.rMult).filter(isNum), pnl = sum(ts.map(t => t.pnl));
+  let run = 0, maxL = 0;
+  ts.slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.seq - b.seq)).forEach(t => { if (t.pnl < 0) { run++; maxL = Math.max(maxL, run); } else run = 0; });
+  return { n, wr: w.length / n, pnl, exp: pnl / n, pf: gl ? gp / gl : null, avgR: rs.length ? sum(rs) / rs.length : null, maxL };
+}
+function renderEdge() {
+  const el = $('#v-edge'), em = state.ui.emode || '';
+  const ts = D.view.filter(t => !em || t.mode === em);
+  const head = `<div class="row" style="margin-bottom:10px"><label class="lbl" for="e-mode" style="margin:0">Show</label><select class="sel" id="e-mode" style="width:auto"><option value="">All test types</option><option value="backtest">Backtest</option><option value="forward">Forward test</option><option value="live">Live</option></select></div>`;
+  if (!ts.length) { el.innerHTML = head + '<div class="card"><div class="empty"><h2>No trades to analyse</h2><p>Log trades and tag them Backtest, Forward test or Live to see where your edge is.</p></div></div>'; $('#e-mode').value = em; return; }
+  const o = statsFor(ts), DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dims = [['Test type', t => MODE_LBL[t.mode]], ['Strategy', t => t.tag || 'No strategy'], ['Pair', t => t.pair || 'No pair'], ['Side', t => t.side.toUpperCase()],
+    ['Day of week', t => DAYS[new Date(t.date + 'T00:00:00Z').getUTCDay()]], ['Timeframe', t => t.timeframe || 'None']];
+  const all = [], tables = dims.map(([name, fn]) => {
+    const g = new Map(); ts.forEach(t => { const k = fn(t); (g.get(k) || g.set(k, []).get(k)).push(t); });
+    const rows = [...g].map(([k, a]) => ({ k, st: statsFor(a) })).sort((x, y) => y.st.exp - x.st.exp);
+    rows.forEach(r => { if (r.st.n >= 5 && g.size > 1) all.push({ name, ...r }); });
+    const mx = Math.max(...rows.map(r => Math.abs(r.st.exp)), 1e-9);
+    return `<div class="card edge-sec"><div class="card-title">By ${name.toLowerCase()}</div><table class="tbl"><thead><tr><th>${name}</th><th class="r">Trades</th><th class="r">Win %</th><th class="r">Expectancy</th><th class="r">Avg R</th><th class="r">Profit factor</th><th class="r">Total P&amp;L</th><th></th></tr></thead><tbody>` +
+      rows.map(({ k, st }) => `<tr><td>${esc(k)}${st.n < 30 ? ' <span class="faint" title="Fewer than 30 trades: treat as a hint, not proof">\u00B7 low sample</span>' : ''}</td><td class="r">${st.n}</td><td class="r">${fmtPct(st.wr, 0)}</td><td class="r ${sgnCls(st.exp)}"><b>${fmtMoney(st.exp, true)}</b></td><td class="r ${sgnCls(st.avgR)}">${isNum(st.avgR) ? fmtNum(st.avgR) + 'R' : '\u2014'}</td><td class="r">${isNum(st.pf) ? fmtNum(st.pf) : '\u2014'}</td><td class="r ${sgnCls(st.pnl)}">${fmtMoney(st.pnl, true)}</td><td><span class="bar"><i class="${st.exp >= 0 ? 'p' : 'n'}" style="width:${(Math.abs(st.exp) / mx * 100).toFixed(0)}%"></i></span></td></tr>`).join('') + '</tbody></table></div>';
+  });
+  all.sort((a, b) => b.st.exp - a.st.exp);
+  const li = a => a.map(x => `<li><b>${esc(x.k)}</b> <span class="faint">(${x.name}, ${x.st.n} trades)</span> \u2014 <span class="${sgnCls(x.st.exp)}">${fmtMoney(x.st.exp, true)}</span> per trade, ${fmtPct(x.st.wr, 0)} win</li>`).join('') || '<li class="faint">Needs at least 5 trades in a group.</li>';
+  const best = all.filter(x => x.st.exp > 0).slice(0, 3), worst = all.filter(x => x.st.exp < 0).slice(-3).reverse();
+  const rs = ts.map(t => t.rMult).filter(isNum), bins = [['\u2264 \u22122R', r => r <= -2], ['\u22122 to \u22121R', r => r > -2 && r <= -1], ['\u22121 to 0R', r => r > -1 && r < 0], ['0 to 1R', r => r >= 0 && r < 1], ['1 to 2R', r => r >= 1 && r < 2], ['2 to 3R', r => r >= 2 && r < 3], ['\u2265 3R', r => r >= 3]];
+  const bc = bins.map(([l, f]) => [l, rs.filter(f).length]), bm = Math.max(...bc.map(b => b[1]), 1);
+  const verdict = o.n < 30 ? `Only ${o.n} trades so far: too few to call an edge. Aim for 30+ per setup.` : o.exp > 0 && (o.pf || 0) > 1.2 ? 'Positive expectancy over a usable sample. Check it holds in forward and live results.' : o.exp > 0 ? 'Slightly positive. Costs or slippage could erase it.' : 'Negative expectancy. Refine the rules before risking real money.';
+  el.innerHTML = head + `<div class="card edge-sec" style="overflow:visible"><div class="card-title">Overall edge</div><dl class="kv">
+    <div><dt>Expectancy</dt><dd class="${sgnCls(o.exp)}">${fmtMoney(o.exp, true)}</dd><small>average per trade</small></div>
+    <div><dt>Avg R</dt><dd class="${sgnCls(o.avgR)}">${isNum(o.avgR) ? fmtNum(o.avgR) + 'R' : '\u2014'}</dd><small>needs risk amount on trades</small></div>
+    <div><dt>Win rate</dt><dd>${fmtPct(o.wr, 1)}</dd><small>${o.n} trades</small></div>
+    <div><dt>Profit factor</dt><dd>${isNum(o.pf) ? fmtNum(o.pf) : '\u2014'}</dd><small>gross profit / gross loss</small></div>
+    <div><dt>Longest losing streak</dt><dd>${o.maxL}</dd><small>plan for this</small></div></dl>
+    <p class="hint" style="margin-top:8px">${esc(verdict)}</p></div>
+    <div class="ins" style="margin-bottom:10px"><div class="card"><div class="card-title">Where your edge is</div><ul>${li(best)}</ul></div><div class="card"><div class="card-title">What is leaking money</div><ul>${li(worst)}</ul></div></div>
+    ${tables.join('')}
+    <div class="card edge-sec"><div class="card-title">R distribution</div>${rs.length ? bc.map(([l, n]) => `<div class="row" style="margin:3px 0"><span class="mono" style="width:90px">${l}</span><span class="bar" style="flex:1"><i class="${l.startsWith('\u2212') || l.startsWith('\u2264') ? 'n' : 'p'}" style="width:${(n / bm * 100).toFixed(0)}%"></i></span><span class="mono" style="width:30px;text-align:right">${n}</span></div>`).join('') : '<p class="hint">Add a risk amount to trades (the calculator fills it) to see R.</p>'}</div>`;
+  $('#e-mode').value = em;
 }
 
 /* ---------- Analytics / chrome ---------- */
@@ -2145,6 +2104,7 @@ function renderActive() {
   else if (t === 'trades') renderTrades();
   else if (t === 'calc') renderCalc();
   else if (t === 'summary') renderSummary();
+  else if (t === 'edge') renderEdge();
   else renderAnalytics();
 }
 function presetFrom(p, anchor) {
@@ -2236,7 +2196,7 @@ function openTrade(id, pre) {
   setNum('f-lots', p.lots); setNum('f-risk', p.risk); setNum('f-entry', p.entry); setNum('f-exit', p.exit); setNum('f-stop', p.stop);
   $('#f-ssb-yes').checked = !!p.screenshotBefore; $('#f-ssb-no').checked = !p.screenshotBefore;
   $('#f-ssa-yes').checked = !!p.screenshotAfter; $('#f-ssa-no').checked = !p.screenshotAfter;
-  $('#f-tag').value = p.tag || ''; $('#f-notes').value = p.notes || '';
+  $('#f-tag').value = p.tag || ''; $('#f-mode').value = p.mode || state.ui.lastMode || 'backtest'; $('#f-notes').value = p.notes || '';
   $('#f-more').open = !!(p.lots || p.risk || p.entry || p.exit || p.stop || p.screenshotBefore || p.screenshotAfter);
   $$('#f-trade .err').forEach(e => { e.hidden = true; });
   $$('#f-trade .invalid').forEach(e => e.classList.remove('invalid'));
@@ -2267,8 +2227,9 @@ function saveTrade() {
     assetType: marketEl && marketEl.value === 'crypto' ? 'crypto' : 'forex', timeframe: $('#f-tf').value,
     lots: opt('f-lots'), risk: opt('f-risk'), entry: opt('f-entry'), exit: opt('f-exit'), stop: opt('f-stop'),
     screenshotBefore: $('#f-ssb-yes').checked, screenshotAfter: $('#f-ssa-yes').checked,
-    tag: $('#f-tag').value, notes: $('#f-notes').value,
+    tag: $('#f-tag').value, notes: $('#f-notes').value, mode: $('#f-mode').value,
   });
+  state.ui.lastMode = data.mode;
   const id = state.ui.editing;
   if (id) { const i = state.trades.findIndex(t => t.id === id); data.id = id; data.seq = state.trades[i].seq; state.trades[i] = data; }
   else { data.seq = ++state.seq; state.trades.push(data); }
@@ -2351,7 +2312,7 @@ async function clearAll() {
   save(); renderAll(); toast('Journal cleared');
 }
 function drill(patch) {
-  Object.assign(state.ui, { tq: '', tasset: '', tpair: '', ttag: '', tout: '', tday: '', page: 1 }, patch);
+  Object.assign(state.ui, { tq: '', tmode: '', tasset: '', tpair: '', ttag: '', tout: '', tday: '', page: 1 }, patch);
   setTab('trades');
 }
 
@@ -2395,26 +2356,16 @@ document.addEventListener('click', e => {
     case 'drill-tag': drill({ ttag: d.tag }); break;
     case 'goto-trades': setTab('trades'); break;
     case 'reset-filters': resetFilters(); break;
-    case 'clear-tfilters': Object.assign(state.ui, { tq: '', tasset: '', tpair: '', ttag: '', tout: '', tday: '', page: 1 }); renderTrades(); break;
+    case 'clear-tfilters': Object.assign(state.ui, { tq: '', tmode: '', tasset: '', tpair: '', ttag: '', tout: '', tday: '', page: 1 }); renderTrades(); break;
     case 'clear-day': state.ui.tday = ''; state.ui.page = 1; renderTrades(); break;
     case 'pg-prev': state.ui.page--; renderTrades(); break;
     case 'pg-next': state.ui.page++; renderTrades(); break;
     case 'calc-balance': $('#c-bal').value = +D.balance.toFixed(2); updateCalc(); break;
+    case 'calc-usestop': $('#c-stop').value = d.stop; updateCalc(); break;
     case 'calc-log': {
-      const i = calcInputs();
-      if (i.type === 'crypto') {
-        const r = calcPositionCrypto(i);
-        if (r.ok) openTrade(null, {
-          pair: r.sym, assetType: 'crypto', side: i.side, lots: r.qtyUsed, entry: i.entry, exit: isNum(i.exit) ? i.exit : null, stop: i.stop,
-          risk: +r.riskAtUsed.toFixed(2), pnl: isNum(r.previewPnl) ? +r.previewPnl.toFixed(2) : null,
-        });
-      } else {
-        const r = calcPosition(i);
-        if (r.ok) openTrade(null, {
-          pair: r.pair.sym, assetType: 'forex', side: i.side, lots: r.lotsUsed, entry: i.entry, exit: isNum(i.exit) ? i.exit : null, stop: i.stop,
-          risk: +r.riskAtUsed.toFixed(2), pnl: isNum(r.previewPnl) ? +r.previewPnl.toFixed(2) : null,
-        });
-      }
+      const i = calcInputs(), r = calcSize(i);
+      if (r.ok) openTrade(null, { pair: r.sym || i.pair.toUpperCase().replace(/[^A-Z0-9]/g, ''), assetType: i.type === 'crypto' ? 'crypto' : 'forex', side: i.side, lots: r.used,
+        entry: i.entry, exit: isNum(i.exit) ? i.exit : null, stop: r.stop, risk: +r.riskUsed.toFixed(2), pnl: isNum(r.preview) ? +r.preview.toFixed(2) : null });
       break;
     }
     case 'calc-pnl': {
@@ -2446,12 +2397,15 @@ document.addEventListener('keydown', e => {
   if (typing || e.ctrlKey || e.metaKey || e.altKey || $('dialog[open]')) return;
   if (e.key === 'n') { e.preventDefault(); openTrade(); }
   else if (e.key === '/') { e.preventDefault(); setTab('trades'); $('#t-q').focus(); }
-  else if (/^[1-5]$/.test(e.key)) setTab(['dash', 'trades', 'calc', 'analytics', 'summary'][+e.key - 1]);
+  else if (/^[1-6]$/.test(e.key)) setTab(['dash', 'trades', 'calc', 'analytics', 'summary', 'edge'][+e.key - 1]);
 });
 $$('input[name=scope]').forEach(r => r.addEventListener('change', () => setScope(r.value)));
 ['#d-from', '#d-to'].forEach(id => $(id).addEventListener('change', () => {
   state.ui.from = $('#d-from').value; state.ui.to = $('#d-to').value; state.ui.preset = null; renderAll();
 }));
+$('#t-mode').addEventListener('change', e => { state.ui.tmode = e.target.value; state.ui.page = 1; renderTrades(); });
+$('#v-edge').addEventListener('change', e => { if (e.target.id === 'e-mode') { state.ui.emode = e.target.value; renderEdge(); } });
+$('#c-step').addEventListener('input', () => { $('#c-step').dataset.auto = '0'; });
 $('#t-q').addEventListener('input', debounce(e => { state.ui.tq = e.target.value.trim(); state.ui.page = 1; renderTrades(); }, 120));
 $('#t-asset').addEventListener('change', e => { state.ui.tasset = e.target.value; state.ui.page = 1; renderTrades(); });
 $('#t-pair').addEventListener('change', e => { state.ui.tpair = e.target.value; state.ui.page = 1; renderTrades(); });
